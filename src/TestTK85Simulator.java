@@ -133,7 +133,7 @@ public class   TestTK85Simulator extends Frame implements SimulatorParent, Actio
   // シミュレーション開始
   public void   startSimulation()
     {
-    simulator = new TK85Simulator( this, this, led, kb );
+    simulator = new TK85Simulator(led, kb);
     simulator.start();
 
     }
