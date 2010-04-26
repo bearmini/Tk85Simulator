@@ -11,7 +11,7 @@ public class   InstructionDCX extends Instruction8085
 
   public void   execute()
     {
-    short   regd = StringToPareReg( getOperands() );
+    short   regd = StringToPairReg( getOperands() );
     int     val  = cpu.reg.getReg( regd );
 
     cpu.reg.setReg( regd, val-1 );

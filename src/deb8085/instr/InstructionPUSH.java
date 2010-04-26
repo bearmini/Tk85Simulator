@@ -12,9 +12,9 @@ public class   InstructionPUSH extends Instruction8085
 
   public void   execute()
     {
-    int     pare = cpu.reg.getReg( (short)StringToPareReg( getOperands() ) );
-    short   reg1 = (short)(( pare&0xFF00 )>>>8);
-    short   reg2 = (short)(  pare&0x00FF );
+    int     pair = cpu.reg.getReg( (short)StringToPairReg( getOperands() ) );
+    short   reg1 = (short)(( pair&0xFF00 )>>>8);
+    short   reg2 = (short)(  pair&0x00FF );
     int     sp   = cpu.reg.getReg( Reg8085.SP );
 
     cpu.mem.setValue( sp-1, reg1 );

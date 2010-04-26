@@ -12,7 +12,7 @@ public class   InstructionLDAX extends Instruction8085
 
   public void   execute()
     {
-    int    addr = cpu.reg.getReg( StringToPareReg( getOperands() ) );
+    int    addr = cpu.reg.getReg( StringToPairReg( getOperands() ) );
     short   val = cpu.mem.getValue( addr );
 
     cpu.reg.setReg( Reg8085.A, val );

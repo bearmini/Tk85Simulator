@@ -153,7 +153,23 @@ opecode
     }
 
 
+  public boolean calcAddCarry(int val1, int val2) {
+	  return (val1 + val2) > 0xFF;
+  }
 
+  public boolean calcAddHalfCarry(int val1, int val2) {
+	  return ((val1 & 0x0F) + (val2 & 0x0F)) > 0x0F;
+  }
+  
+  public boolean calcSubCarry(int val1, int val2) {
+	  return val2 > val1;	  
+  }
+
+  public boolean calcSubHalfCarry(int val1, int val2) {
+	  return (val2 & 0x0F) > (val1 & 0x0F);
+  }
+  
+  
   // •¶š—ñ‚ğƒŒƒWƒXƒ^’è”‚É‚·‚é
   // "A" ‚È‚ç Reg8085.A ‚È‚Ç
   static byte   StringToReg( String   reg )
@@ -178,7 +194,7 @@ opecode
       return 0;
     }
 
-  static short   StringToPareReg( String   reg )
+  static short   StringToPairReg( String   reg )
     {
     if( reg.equals( "PSW" ) )
       return   Reg8085.AF;

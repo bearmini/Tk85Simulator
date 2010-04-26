@@ -11,7 +11,7 @@ public class   InstructionINX extends Instruction8085
 
   public void   execute()
     {
-    short   regi = StringToPareReg( getOperands() );
+    short   regi = StringToPairReg( getOperands() );
     int     val  = cpu.reg.getReg( regi );
 
     cpu.reg.setReg( regi, val+1 );

@@ -46,7 +46,8 @@ public class   Reg8085
     {
     cpu = parent;
 
-    a = b = c = d = e = h = l = m = flags = 0;
+    a = b = c = d = e = h = l = m = 0;
+    flags = 0x02; // bit1 is '1' fixed
     pc = sp = 0;
     }
 
@@ -88,24 +89,24 @@ public class   Reg8085
         cpu.mem.setValue( h*0x100+l, (short)value );
         break;
       case FLAGS:
-        flags = (short)value;
+        flags = (short)(value | 0x02); // bit1 is '1' fixed 
         break;
 
       case AF:
-        a     = (short)(value / 0x100);
-        flags = (short)(value % 0x100);
+        a     = (short)((value & 0xFF00) >> 8);
+        flags = (short)((value & 0x00FF) | 0x02); // bit1 is '1' fixed 
         break;
       case BC:
-        b = (short)(value / 0x100);
-        c = (short)(value % 0x100);
+        b = (short)((value & 0xFF00) >> 8);
+        c = (short)((value & 0x00FF));
         break;
       case DE:
-        d = (short)(value / 0x100);
-        e = (short)(value % 0x100);
+        d = (short)((value & 0xFF00) >> 8);
+        e = (short)((value & 0x00FF));
         break;
       case HL:
-        h = (short)(value / 0x100);
-        l = (short)(value % 0x100);
+        h = (short)((value & 0xFF00) >> 8);
+        l = (short)((value & 0x00FF));
         break;
       case SP:
         sp = value;
@@ -150,13 +151,13 @@ public class   Reg8085
     switch( kind )
       {
       case AF:
-        return a*0x100 + flags;
+        return ((a & 0xFF) << 8) | (flags & 0xFF);
       case BC:
-        return b*0x100 + c;
+        return ((b & 0xFF) << 8) | (c & 0xFF);
       case DE:
-        return d*0x100 + e;
+        return ((d & 0xFF) << 8) | (e & 0xFF);
       case HL:
-        return h*0x100 + l;
+        return ((h & 0xFF) << 8) | (l & 0xFF);
       case SP:
         return sp;
       case PC:

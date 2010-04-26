@@ -12,7 +12,7 @@ public class   InstructionPOP extends Instruction8085
 
   public void   execute()
     {
-    short   parereg = StringToPareReg( getOperands() );
+    short   parereg = StringToPairReg( getOperands() );
     int     sp   = cpu.reg.getReg( Reg8085.SP );
 
     short   mem1 = cpu.mem.getValue( sp );

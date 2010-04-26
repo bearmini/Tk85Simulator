@@ -12,7 +12,7 @@ public class   InstructionSTAX extends Instruction8085
 
   public void   execute()
     {
-    int    addr = cpu.reg.getReg( StringToPareReg( getOperands() ) );
+    int    addr = cpu.reg.getReg( StringToPairReg( getOperands() ) );
     short   val = cpu.reg.getReg( Reg8085.A );
 
     cpu.mem.setValue( addr, val );

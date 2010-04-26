@@ -26,7 +26,7 @@ public class   CPU8085
   private boolean   halted;   // CPU は停止しているか
 
   short   oldAreg;            // フラグ変化のとき参照するために保存しておく、命令実行前の A レジスタ
-  public boolean   subflag;   // DAA を実行するとき、加算の10進補正をするか(false)、減算の10進補正をするか(true)
+  public boolean   subtractedFlag;   // DAA を実行するとき、加算の10進補正をするか(false)、減算の10進補正をするか(true)
   public boolean   interruptEnabled;  // 割り込みが許可されているか
 
 
@@ -290,8 +290,8 @@ public class   CPU8085
 
   public final static int   FLAGUPDATE_INRDCR     = 0x10;
 
-  public final static int   FLAGUPDATE_SET_SUB    = 0x100;
-  public final static int   FLAGUPDATE_RESET_SUB  = 0x200;
+  public final static int   FLAGUPDATE_SET_SUBTRUCTED    = 0x100;
+  public final static int   FLAGUPDATE_RESET_SUBTRUCTED  = 0x200;
 
   // フラグの更新
   public void   updateFlags( int   status )
@@ -299,39 +299,24 @@ public class   CPU8085
     if( ( status & FLAGUPDATE_ALL ) != 0 )
       {
       reg.setFlag( Reg8085.Zf,  reg.getReg( Reg8085.A ) == 0 );
-      reg.setFlag( Reg8085.Cf,  ( reg.getReg( Reg8085.A ) & 0x80 ) != ( oldAreg & 0x80 ) );
       reg.setFlag( Reg8085.Sf,  reg.getReg( Reg8085.A ) > 0x7F );
       reg.setFlag( Reg8085.Pf,  parityCheck( reg.getReg( Reg8085.A ) ) );
-      reg.setFlag( Reg8085.ACf, ( reg.getReg( Reg8085.A ) & 0x08 ) != ( oldAreg & 0x08 ) );
-      }
-    else if( ( status & FLAGUPDATE_NO_CARRY ) != 0 )
-      {
-      reg.setFlag( Reg8085.Zf,  reg.getReg( Reg8085.A ) == 0 );
-//    reg.setFlag( Reg8085.Cf,  ( reg.getReg( Reg8085.A ) & 0x80 ) != oldAreg & 0x80 );
-      reg.setFlag( Reg8085.Sf,  reg.getReg( Reg8085.A ) > 0x7F );
-      reg.setFlag( Reg8085.Pf,  parityCheck( reg.getReg( Reg8085.A ) ) );
-      reg.setFlag( Reg8085.ACf, ( reg.getReg( Reg8085.A ) & 0x08 ) != ( oldAreg & 0x08 ) );
-      }
-    else if( ( status & FLAGUPDATE_CARRY_ONLY ) != 0 )
-      {
-      reg.setFlag( Reg8085.Cf,( reg.getReg( Reg8085.A ) & 0x80 ) != ( oldAreg & 0x80  ) );
       }
     else if( ( status & FLAGUPDATE_CARRY_0 ) != 0 )
       {
       reg.setFlag( Reg8085.Zf,  reg.getReg( Reg8085.A ) == 0 );
-      reg.setFlag( Reg8085.Cf,  false );
       reg.setFlag( Reg8085.Sf,  reg.getReg( Reg8085.A ) > 0x7F );
       reg.setFlag( Reg8085.Pf,  parityCheck( reg.getReg( Reg8085.A ) ) );
-      reg.setFlag( Reg8085.ACf, ( reg.getReg( Reg8085.A ) & 0x08 ) != ( oldAreg & 0x08 ) );
+      reg.setFlag( Reg8085.Cf,  false );
       }
 
-    if( ( status & FLAGUPDATE_SET_SUB ) != 0 )
+    if( ( status & FLAGUPDATE_SET_SUBTRUCTED ) != 0 )
       {
-      subflag = true;
+      subtractedFlag = true;
       }
-    else if( ( status & FLAGUPDATE_RESET_SUB ) != 0 )
+    else if( ( status & FLAGUPDATE_RESET_SUBTRUCTED ) != 0 )
       {
-      subflag = false;
+      subtractedFlag = false;
       }
 
 
@@ -355,7 +340,7 @@ public class   CPU8085
       }
     }
 
-
+  
   //***************************************************************************************************
   // パリティチェック  偶数のときに 1(true)
   public boolean   parityCheck( short   regA )

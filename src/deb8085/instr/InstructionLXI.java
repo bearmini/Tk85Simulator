@@ -11,7 +11,7 @@ public class   InstructionLXI extends Instruction8085
 
   public void   execute()
     {
-    short   regl = StringToPareReg( getOperands() );
+    short   regl = StringToPairReg( getOperands() );
     int     val  = getB3B2();
 
     cpu.reg.setReg( regl, val );
