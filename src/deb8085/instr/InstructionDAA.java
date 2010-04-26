@@ -47,7 +47,7 @@ public class InstructionDAA extends Instruction8085 {
 	}
 
 	public boolean calcBcdCarry(int val) {
-		return bcdAdd((short)val) > 0xFF;
+		return bcdAdd((short) val) > 0xFF;
 	}
 
 	public boolean calcBcdHalfCarry(int val) {

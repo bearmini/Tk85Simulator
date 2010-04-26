@@ -1,6 +1,5 @@
-package   deb8085;
+package deb8085;
 
-public interface   OutputDevice
-  {
-  public abstract void   out( int   portnum, int   val );
-  }
+public interface OutputDevice {
+	public abstract void out(int portnum, int val);
+}

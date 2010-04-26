@@ -1,21 +1,15 @@
-package   deb8085;
+package deb8085;
 
-import   java.lang.Throwable;
+import java.lang.Throwable;
 
+public class BreakPointListException extends Throwable {
+	String message;
 
-public class   BreakPointListException extends Throwable
-  {
-  String   message;
+	public BreakPointListException() {
+	}
 
+	public BreakPointListException(String s) {
+		message = s;
+	}
 
-  public   BreakPointListException()
-    {
-    }
-
-  public   BreakPointListException( String   s )
-    {
-    message = s;
-    }
-
-
-  }
+}

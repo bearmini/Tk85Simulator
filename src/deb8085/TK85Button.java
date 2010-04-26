@@ -1,23 +1,18 @@
-package   deb8085;
+package deb8085;
 
-import   java.awt.Button;
-
-
+import java.awt.Button;
 
 //***************************************************************************************************
 //***************************************************************************************************
 /* TK85 キーボード用の キーボタン */
-public class   TK85Button extends Button
-  {
-  public int   keycode;
+public class TK85Button extends Button {
+	public int keycode;
 
-  //***************************************************************************************************
-  // コンストラクタ
-  public   TK85Button( int   code, String   caption )
-    {
-    keycode = code;
-    setLabel( caption );
-    }
+	// ***************************************************************************************************
+	// コンストラクタ
+	public TK85Button(int code, String caption) {
+		keycode = code;
+		setLabel(caption);
+	}
 
-
-  }
+}
