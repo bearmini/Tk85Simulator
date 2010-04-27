@@ -21,12 +21,12 @@ public class CPU8085 {
 
 	private boolean halted = false; // CPU は停止しているか
 
-	private int instructions_per_tick = 0; 
+	private int instructions_per_tick = 0;
 	private long last_tick = 0;
-	
+
 	short oldAreg; // フラグ変化のとき参照するために保存しておく、命令実行前の A レジスタ
 	public boolean subtractedFlag; // DAA
-									// を実行するとき、加算の10進補正をするか(false)、減算の10進補正をするか(true)
+	// を実行するとき、加算の10進補正をするか(false)、減算の10進補正をするか(true)
 	public boolean interruptEnabled; // 割り込みが許可されているか
 
 	// 割り込まれたかどうかチェックするフラグ
@@ -101,13 +101,13 @@ public class CPU8085 {
 		if (instructions_per_tick == 0) {
 			last_tick = System.currentTimeMillis();
 		}
-		
+
 		// 命令実行
 		synchronized (this) {
 			inst.execute();
 		}
 
-		instructions_per_tick++;	
+		instructions_per_tick++;
 		if (instructions_per_tick > 100) {
 			try {
 				Thread.sleep(10);
@@ -115,14 +115,15 @@ public class CPU8085 {
 			}
 			instructions_per_tick = 0;
 		}
-		
-		// ブレークポイントのチェック
-		if (breakPoints.existBreakPoint(reg.getReg(reg.PC))) {
-			halted = true;
-			throw new OnBreakPointException("Break point at address "
-					+ util.hex4(reg.getReg(reg.PC)) + ".");
-		}
 
+		// ブレークポイントのチェック
+		if (breakPoints != null) {
+			if (breakPoints.existBreakPoint(reg.getReg(reg.PC))) {
+				halted = true;
+				throw new OnBreakPointException("Break point at address "
+						+ util.hex4(reg.getReg(reg.PC)) + ".");
+			}
+		}
 		// 割り込みフラグのリセット
 		resetInterruptFlag();
 

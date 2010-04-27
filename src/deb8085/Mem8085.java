@@ -19,33 +19,52 @@ public class Mem8085 {
 
 	// 値をセット
 	public void setValue(int addr, int value) {
-		if (addr < 0 || addr > 0xFFFF)
+		if (outOfAddressRange(addr)) {
 			return;
-
+		}
+		
 		if (readonly[addr])
 			return;
 
 		area[addr] = (short) (value & 0xFF);
-		// System.out.println("Memory : set value : at " + util.hex4(addr) +
-		// "  value:"+util.hex2(value) );
 	}
 
 	// 値を読み出す
 	public short getValue(int addr) {
-		if (addr >= 0 && addr <= 0xFFFF) {
-			// System.out.println("Memory : get value : at " + util.hex4(addr) +
-			// "  value:"+util.hex2(area[addr]) );
-			return area[addr];
-		} else
+		if (outOfAddressRange(addr)) {
 			return 0xaa;// Error
+		}
+
+		return area[addr];
 	}
 
 	// リードオンリーかどうかをセット
 	public void setReadOnly(int addr, boolean readonly) {
-		if (addr < 0 || addr > 0xFFFF)
+		if (outOfAddressRange(addr)) {
 			return;
+		}
 
 		this.readonly[addr] = readonly;
 	}
 
+	public void setRange(int addr, short[] values) {
+		if (outOfAddressRange(addr)) {
+			return;
+		}
+		
+		if (addr + values.length > 0xFFFF) {
+			return;
+		}
+		
+		for (int i = 0; i < values.length; ++i) {
+			area[addr + i] = values[i];
+		}
+	}
+	
+	private boolean outOfAddressRange(int addr) {
+		if ((addr < 0) || (0xFFFF < addr)) {
+			return true;
+		}
+		return false;
+	}
 }
