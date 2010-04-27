@@ -19,8 +19,11 @@ public class CPU8085 {
 	// ブレークポイント
 	public BreakPointList breakPoints;
 
-	private boolean halted; // CPU は停止しているか
+	private boolean halted = false; // CPU は停止しているか
 
+	private int instructions_per_tick = 0; 
+	private long last_tick = 0;
+	
 	short oldAreg; // フラグ変化のとき参照するために保存しておく、命令実行前の A レジスタ
 	public boolean subtractedFlag; // DAA
 									// を実行するとき、加算の10進補正をするか(false)、減算の10進補正をするか(true)
@@ -95,12 +98,24 @@ public class CPU8085 {
 		inst.setOperands(operands);
 
 		saveAreg();
-
+		if (instructions_per_tick == 0) {
+			last_tick = System.currentTimeMillis();
+		}
+		
 		// 命令実行
 		synchronized (this) {
 			inst.execute();
 		}
 
+		instructions_per_tick++;	
+		if (instructions_per_tick > 100) {
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+			}
+			instructions_per_tick = 0;
+		}
+		
 		// ブレークポイントのチェック
 		if (breakPoints.existBreakPoint(reg.getReg(reg.PC))) {
 			halted = true;
