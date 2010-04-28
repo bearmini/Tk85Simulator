@@ -1,10 +1,14 @@
 package deb8085;
 
 import java.awt.FlowLayout;
-import java.awt.LayoutManager;
 import java.awt.Panel;
 
 public class TK85LED extends Panel implements DMADevice {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2580635679994682988L;
+	
 	LED7Seg led[];
 	Panel addr = new Panel(); // アドレス表示用 LED のコンテナ
 	Panel data = new Panel(); // データ 表示用 LED のコンテナ

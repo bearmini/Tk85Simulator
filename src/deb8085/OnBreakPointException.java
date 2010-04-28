@@ -3,6 +3,11 @@ package deb8085;
 import java.lang.Throwable;
 
 public class OnBreakPointException extends Throwable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -200400590564122488L;
+	
 	String message;
 
 	public OnBreakPointException() {

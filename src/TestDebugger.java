@@ -8,6 +8,11 @@ import deb8085.*;
 /* デバッガ用のフレームクラス */
 public class TestDebugger extends Frame implements DebuggerParent,
 		ActionListener, WindowListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2444040100756005797L;
+
 	Debugger debugger; // デバッガ
 
 	public TextArea output;
@@ -93,7 +98,7 @@ public class TestDebugger extends Frame implements DebuggerParent,
 
 		window.setTitle("デバッガ動作確認");
 		window.pack();
-		window.show();
+		window.setVisible(true);
 
 		window.startDebug();
 
@@ -106,8 +111,8 @@ public class TestDebugger extends Frame implements DebuggerParent,
 			return;
 
 		debuggingNow = true;
-		mniStart.disable();
-		mniStop.enable();
+		mniStart.setEnabled(false);
+		mniStop.setEnabled(false);
 
 		debugger = new Debugger(this, this, output);
 		debugger.start();
@@ -121,7 +126,7 @@ public class TestDebugger extends Frame implements DebuggerParent,
 			return;
 
 		onEndDebug();
-		debugger.stop();
+		debugger.requestStop();
 	}
 
 	// ***************************************************************************************************
@@ -133,8 +138,8 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	// デバッグ終了時
 	public void onEndDebug() {
 		debuggingNow = false;
-		mniStart.enable();
-		mniStop.disable();
+		mniStart.setEnabled(true);
+		mniStop.setEnabled(false);
 	}
 
 }

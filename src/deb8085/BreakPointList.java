@@ -2,7 +2,12 @@ package deb8085;
 
 import java.util.Vector;
 
-public class BreakPointList extends Vector {
+public class BreakPointList extends Vector<BreakPoint8085> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4373536766987022234L;
 
 	// ***************************************************************************************************
 	// コンストラクタ

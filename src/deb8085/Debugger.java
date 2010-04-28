@@ -20,6 +20,8 @@ import deb8085.instr.*;
 public class Debugger extends Thread {
 	DebuggerParent parent;
 
+	private boolean shouldExit = false;
+
 	Frame frame;
 	TextArea output;
 
@@ -62,6 +64,10 @@ public class Debugger extends Thread {
 		output.requestFocus();
 	}
 
+	public void requestStop() {
+		this.shouldExit = true;
+	}
+
 	// ***************************************************************************************************
 	// デバッグする
 	public void run() {
@@ -70,7 +76,7 @@ public class Debugger extends Thread {
 		do {
 			// 命令を入力し、実行
 			dispatch(getCommand());
-		} while (true);
+		} while (!shouldExit);
 
 	}
 
@@ -391,7 +397,7 @@ public class Debugger extends Thread {
 		case 'Q':
 		case 'q': {
 			parent.onEndDebug();
-			this.stop();
+			shouldExit = true;
 			break;
 		}
 
@@ -632,7 +638,6 @@ public class Debugger extends Thread {
 	void printTraceInfo(Instruction8085 inst) {
 		StringBuffer sbAddr = new StringBuffer();
 		StringBuffer sbInst = new StringBuffer();
-		int headpos = output.getCaretPosition();
 
 		// 命令のアドレス
 		sbAddr.append(util.hex4(cpu.reg.getReg(Reg8085.PC)));
@@ -1042,7 +1047,6 @@ public class Debugger extends Thread {
 	// トレース
 	void comTraceProgram(int startAddr, int endAddr, boolean traceOneStep) {
 		String message = null;
-		StringBuffer sbRegs = new StringBuffer();
 		Instruction8085 inst;
 
 		keyEchoOff();
@@ -1166,7 +1170,6 @@ public class Debugger extends Thread {
 		// PUBLIC ラベルのデータを書き込み
 		d.writeShort(util.swapEndian(publicLabels.size()));
 
-		byte[] buf = new byte[8];
 		for (int num = 0; num < publicLabels.size(); num++) {
 			PublicLabel8085 p = publicLabels.getPublicLabelAt(num);
 			for (int i = 0; i < 8; i++)
@@ -1215,7 +1218,7 @@ public class Debugger extends Thread {
 	// ファイル名を得る FileDialog を使う
 	public String getFilename() {
 		FileDialog fd = new FileDialog(frame, "Open MIC File");
-		fd.show();
+		fd.setVisible(true);
 		if (fd.getDirectory() != null && fd.getFile() != null)
 			return fd.getDirectory() + fd.getFile();
 		else

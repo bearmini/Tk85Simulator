@@ -1,8 +1,18 @@
 package deb8085.io;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-public class RingBufferTest extends Frame {
+public class RingBufferTest extends Frame implements ActionListener,
+		WindowListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6284291413734614955L;
+
 	RingBuffer buf;
 	TextArea console;
 
@@ -11,9 +21,13 @@ public class RingBufferTest extends Frame {
 		// ボーダーレイアウトでコンポーネントを配置
 		setLayout(new BorderLayout());
 
-		add("South", new Button("TEST"));
-		console = new TextArea("", 20, 30);
-		add("Center", console);
+		Button buttonTest = new Button("TEST");
+		buttonTest.addActionListener(this);
+		this.add("South", buttonTest);
+		this.console = new TextArea("", 20, 30);
+		this.add("Center", console);
+
+		this.addWindowListener(this);
 	}
 
 	public static void main(String args[]) {
@@ -21,7 +35,7 @@ public class RingBufferTest extends Frame {
 
 		appli.setTitle("リングバッファ動作確認");
 		appli.pack();
-		appli.show();
+		appli.setVisible(true);
 	}
 
 	void test() {
@@ -33,23 +47,38 @@ public class RingBufferTest extends Frame {
 		}
 	}
 
-	public boolean handleEvent(Event e) {
-		switch (e.id) {
-		case Event.WINDOW_DESTROY:
-			System.exit(0);
-		}
-		return super.handleEvent(e);
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		test();
 	}
 
-	public boolean action(Event event, Object arg) {
-		String label = (String) arg;
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+	}
 
-		if (event.target instanceof Button) {
-			if (label.equals("TEST"))
-				test();
-		}
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+	}
 
-		return super.action(event, arg);
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		this.dispose();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
 	}
 
 }

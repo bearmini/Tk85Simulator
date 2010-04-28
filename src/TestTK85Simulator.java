@@ -12,6 +12,11 @@ import deb8085.*;
 /* シミュレータ用のフレームクラス */
 public class TestTK85Simulator extends Frame implements SimulatorParent,
 		ActionListener, WindowListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6695598103208111051L;
+	
 	TK85Simulator simulator; // TK85シミュレータ
 	TK85LED led;
 	TK85Keyboard kb;
@@ -104,7 +109,7 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 
 		window.setTitle("TK85シミュレータ 動作確認");
 		window.pack();
-		window.show();
+		window.setVisible(true);
 
 		window.startSimulation();
 
@@ -127,7 +132,7 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	// ファイル名をダイアログを用いて取得
 	String getFilename() {
 		FileDialog fd = new FileDialog(this, "Open MIC File");
-		fd.show();
+		fd.setVisible(true);
 		if (fd.getDirectory() != null && fd.getFile() != null)
 			return fd.getDirectory() + fd.getFile();
 		else
@@ -151,10 +156,14 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 			throw new IOException();
 		}
 
-		// コード領域・作業領域データの取得＆読み捨て
+		// コード領域データの取得
 		int codeAddr = util.swapEndian(d.readUnsignedShort());
 		int codeSize = util.swapEndian(d.readUnsignedShort());
+		
+		// 作業領域データは MIC ファイルに入っているが今のところサポートしないので読み捨て
+		@SuppressWarnings("unused")
 		int workSize = d.readUnsignedShort();
+		@SuppressWarnings("unused")
 		int workAddr = d.readUnsignedShort();
 
 		// コードを取得し、｢メモリ｣ に格納

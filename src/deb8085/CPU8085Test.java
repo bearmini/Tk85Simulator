@@ -28,7 +28,7 @@ public class CPU8085Test {
 		assertEquals(0x10, cpu.reg.getReg(Reg8085.A));
 
 		runProgram(0x8000, new short[] {0x3E, 0x99, 0xC6, 0x99, 0x27, 0x76});
-		assertEquals(0x10, cpu.reg.getReg(Reg8085.A));
+		assertEquals(0x98, cpu.reg.getReg(Reg8085.A));
 	}
 
 	private void runProgram(int addr, short[] program) {

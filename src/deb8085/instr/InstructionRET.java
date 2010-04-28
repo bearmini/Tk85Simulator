@@ -35,7 +35,6 @@ public class InstructionRET extends Instruction8085 {
 
 		if (conditionOK) {
 			int sp = cpu.reg.getReg(Reg8085.SP);
-			int pc = cpu.reg.getReg(Reg8085.PC);
 
 			short pcH = cpu.mem.getValue(sp + 1);
 			short pcL = cpu.mem.getValue(sp);

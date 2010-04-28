@@ -45,6 +45,11 @@ PortC 6 |-----+       |       |
 /* TK85 キーボード クラス */
 public class TK85Keyboard extends Panel implements ParallelInputDevice,
 		ParallelOutputDevice, MouseListener, ItemListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7487546109493618329L;
+
 	// TK85 シミュレータ
 	public TK85Simulator simulator;
 

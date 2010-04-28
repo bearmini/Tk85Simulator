@@ -22,7 +22,6 @@ public class CPU8085 {
 	private boolean halted = false; // CPU は停止しているか
 
 	private int instructions_per_tick = 0;
-	private long last_tick = 0;
 
 	short oldAreg; // フラグ変化のとき参照するために保存しておく、命令実行前の A レジスタ
 	public boolean subtractedFlag; // DAA
@@ -63,7 +62,7 @@ public class CPU8085 {
 	// ***************************************************************************************************
 	// １命令取得 現在の PC 値の位置から命令をフェッチ
 	public short fetch() {
-		return mem.getValue(reg.getReg(reg.PC));
+		return mem.getValue(reg.getReg(Reg8085.PC));
 	}
 
 	// ***************************************************************************************************
@@ -71,10 +70,10 @@ public class CPU8085 {
 	public Instruction8085 decode(short code) {
 		Instruction8085 inst = dec.decode(code);
 		if (inst.getSize() == 2)
-			inst.setB2((short) mem.getValue(reg.getReg(reg.PC) + 1));
+			inst.setB2((short) mem.getValue(reg.getReg(Reg8085.PC) + 1));
 		else if (inst.getSize() == 3) {
-			inst.setB2((short) mem.getValue(reg.getReg(reg.PC) + 1));
-			inst.setB3((short) mem.getValue(reg.getReg(reg.PC) + 2));
+			inst.setB2((short) mem.getValue(reg.getReg(Reg8085.PC) + 1));
+			inst.setB3((short) mem.getValue(reg.getReg(Reg8085.PC) + 2));
 		}
 		return inst;
 	}
@@ -87,7 +86,8 @@ public class CPU8085 {
 
 		// 命令実行準備
 		StringTokenizer st = new StringTokenizer(inst.getMnemonic(), " ");
-		String opecode = st.nextToken();
+		@SuppressWarnings("unused")
+		String opecode = st.nextToken();  // this cannot be removed!
 		String operands;
 
 		if (st.hasMoreTokens())
@@ -98,15 +98,13 @@ public class CPU8085 {
 		inst.setOperands(operands);
 
 		saveAreg();
-		if (instructions_per_tick == 0) {
-			last_tick = System.currentTimeMillis();
-		}
 
 		// 命令実行
 		synchronized (this) {
 			inst.execute();
 		}
 
+		// TODO: this 'timing' code should be in owner of CPU8085 (such as Tk85SimulatorApplet etc.)
 		instructions_per_tick++;
 		if (instructions_per_tick > 100) {
 			try {
@@ -118,10 +116,10 @@ public class CPU8085 {
 
 		// ブレークポイントのチェック
 		if (breakPoints != null) {
-			if (breakPoints.existBreakPoint(reg.getReg(reg.PC))) {
+			if (breakPoints.existBreakPoint(reg.getReg(Reg8085.PC))) {
 				halted = true;
 				throw new OnBreakPointException("Break point at address "
-						+ util.hex4(reg.getReg(reg.PC)) + ".");
+						+ util.hex4(reg.getReg(Reg8085.PC)) + ".");
 			}
 		}
 		// 割り込みフラグのリセット
@@ -245,7 +243,7 @@ public class CPU8085 {
 	// ***************************************************************************************************
 	// プログラムカウンタを d 増やす
 	public void incPC(int d) {
-		reg.setReg(Reg8085.PC, reg.getReg(reg.PC) + d);
+		reg.setReg(Reg8085.PC, reg.getReg(Reg8085.PC) + d);
 	}
 
 	// ***************************************************************************************************

@@ -2,7 +2,12 @@ package deb8085;
 
 import java.util.Vector;
 
-public class PublicLabelList extends Vector {
+public class PublicLabelList extends Vector<PublicLabel8085> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3349868346842008086L;
 
 	// ***************************************************************************************************
 	// コンストラクタ

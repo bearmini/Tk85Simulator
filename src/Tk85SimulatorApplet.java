@@ -8,6 +8,11 @@ import deb8085.TK85LED;
 import deb8085.TK85Simulator;
 
 public class Tk85SimulatorApplet extends Applet {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8112550200725052568L;
+	
 	TK85Simulator simulator; // TK85シミュレータ
 	TK85LED led;
 	TK85Keyboard kb;

@@ -29,7 +29,7 @@ class Encoder8085 {
 	CPU8085 cpu;
 
 	// エンコードテーブル
-	Hashtable table = new Hashtable(256);
+	Hashtable<String, Instruction8085> table = new Hashtable<String, Instruction8085>(256);
 
 	// コンストラクタ
 	public Encoder8085(CPU8085 cpu) {
@@ -524,7 +524,7 @@ class Encoder8085 {
 // 簡易アセンブラ
 public class SimpleAssembler {
 
-	Hashtable table = new Hashtable(256);
+	Hashtable<String, Instruction8085> table = new Hashtable<String, Instruction8085>(256);
 
 	CPU8085 cpu;
 	Encoder8085 encoder;

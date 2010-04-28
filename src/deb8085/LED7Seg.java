@@ -5,6 +5,11 @@ import java.awt.Color;
 import java.awt.Graphics;
 
 public class LED7Seg extends Canvas {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 584293909941667985L;
+
 	// セグメントデータ
 	public short segdata = 15;
 
