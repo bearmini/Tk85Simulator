@@ -47,7 +47,21 @@ public class InstructionDAA extends Instruction8085 {
 	}
 
 	private short bcdSub(short val) {
-		return val; // not implemented
+		int l = (val & 0x0F);
+		boolean carry_l = false;
+
+		if ((l > 9) || cpu.reg.getFlag(Reg8085.ACf)) {
+			val -= 6;
+			carry_l = (val < 0);
+		}
+
+		int h = (val & 0xF0) >>> 4;
+
+		if ((h > 9) || cpu.reg.getFlag(Reg8085.Cf) || carry_l) {
+			val -= 0x60;
+		}
+
+		return val;
 	}
 
 	public boolean calcBcdCarry(int val, int bcd) {

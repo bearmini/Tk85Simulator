@@ -29,6 +29,12 @@ public class CPU8085Test {
 
 		runProgram(0x8000, new short[] {0x3E, 0x99, 0xC6, 0x99, 0x27, 0x76});
 		assertEquals(0x98, cpu.reg.getReg(Reg8085.A));
+
+		runProgram(0x8000, new short[] {0x3E, 0x10, 0xD6, 0x01, 0x27, 0x76});
+		assertEquals(0x09, cpu.reg.getReg(Reg8085.A));
+
+		runProgram(0x8000, new short[] {0x3E, 0x22, 0xD6, 0x32, 0x27, 0x76});
+		assertEquals(0x90, cpu.reg.getReg(Reg8085.A));  // is this the expected behavior??
 	}
 
 	private void runProgram(int addr, short[] program) {
