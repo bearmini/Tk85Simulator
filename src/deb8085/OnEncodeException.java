@@ -1,6 +1,6 @@
 ﻿package deb8085;
 
-public class OnEncodeException extends Throwable {
+public class OnEncodeException extends Exception {
 	/**
 	 * 
 	 */

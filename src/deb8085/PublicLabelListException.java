@@ -2,7 +2,7 @@
 
 import java.lang.Throwable;
 
-public class PublicLabelListException extends Throwable {
+public class PublicLabelListException extends Exception {
 	/**
 	 * 
 	 */

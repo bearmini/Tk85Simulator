@@ -2,7 +2,7 @@
 
 import java.lang.Throwable;
 
-public class OnBreakPointException extends Throwable {
+public class OnBreakPointException extends Exception {
 	/**
 	 * 
 	 */
