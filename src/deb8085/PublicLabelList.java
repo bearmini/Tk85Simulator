@@ -1,125 +1,128 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.util.Vector;
 
 public class PublicLabelList extends Vector<PublicLabel8085> {
 
-	/**
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -3349868346842008086L;
+    private static final long serialVersionUID = -3349868346842008086L;
 
-	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	public PublicLabelList() {
-	}
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹ã‚¹ã‚¹Xã‚¹gã‚¹ã‚¹ã‚¹Nã‚¹^
+    public PublicLabelList() {
+    }
 
-	// ***************************************************************************************************
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ğƒŠƒXƒg‚É’Ç‰Á
-	public void addPublicLabel(String name, int addr)
-			throws PublicLabelListException {
-		name = name.toUpperCase();
+    // ***************************************************************************************************
+    // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Xã‚¹gã‚¹ãƒè¿½ä¼šã‚½ã‚¹
+    public void addPublicLabel(String name, int addr)
+            throws PublicLabelListException {
+        name = name.toUpperCase();
 
-		if (existPublicLabel(name))
-			throw new PublicLabelListException("Name " + name
-					+ " is already defined.");
-		else if (existPublicLabel(addr))
-			throw new PublicLabelListException("Public label for address "
-					+ util.hex4(addr) + " is already defined.");
-		else
-			addElement(new PublicLabel8085(name, addr));
+        if (existPublicLabel(name))
+            throw new PublicLabelListException("Name " + name
+                    + " is already defined.");
+        else if (existPublicLabel(addr))
+            throw new PublicLabelListException("Public label for address "
+                    + util.hex4(addr) + " is already defined.");
+        else
+            addElement(new PublicLabel8085(name, addr));
 
-	}
+    }
 
-	// ***************************************************************************************************
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ğƒŠƒXƒg‚©‚çíœ
-	public void delPublicLabel(String name) throws PublicLabelListException {
-		name = name.toUpperCase();
+    // ***************************************************************************************************
+    // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Xã‚¹gã‚¹ã‚¹ã‚¹ã‚¹å°
+    public void delPublicLabel(String name) throws PublicLabelListException {
+        name = name.toUpperCase();
 
-		try {
-			removeElementAt(getPublicLabelIndex(name));
-		} catch (PublicLabelListException e) {
-			throw e;
-		}
+        try {
+            removeElementAt(getPublicLabelIndex(name));
+        } catch (PublicLabelListException e) {
+            throw e;
+        }
 
-	}
+    }
 
-	// ***************************************************************************************************
-	// w’è‚µ‚½–¼‘O‚ÌƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ª‰½”Ô–Ú‚©
-	public int getPublicLabelIndex(String name) throws PublicLabelListException {
-		for (int i = 0; i < size(); i++) {
-			PublicLabel8085 p = (PublicLabel8085) elementAt(i);
-			if (p.name.equals(name))
-				return i;
-		}
-		// Œ©‚Â‚©‚ç‚È‚©‚Á‚½‚ç
-		throw new PublicLabelListException(name + " is not defined.");
-	}
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚ªã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Oã‚¹ãƒ•ãƒ‘ã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ¤ç›®ã‚‘ã‚½ã‚¹
+    public int getPublicLabelIndex(String name) throws PublicLabelListException {
+        for (int i = 0; i < size(); i++) {
+            PublicLabel8085 p = (PublicLabel8085) elementAt(i);
+            if (p.name.equals(name))
+                return i;
+        }
+        // ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        throw new PublicLabelListException(name + " is not defined.");
+    }
 
-	// ***************************************************************************************************
-	// w’è‚³‚ê‚½–¼‘O‚ÌƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ª‚ ‚é‚©‚Ç‚¤‚©
-	public boolean existPublicLabel(String name) {
-		for (int i = 0; i < size(); i++) {
-			PublicLabel8085 p = (PublicLabel8085) elementAt(i);
-			if (p.name.equals(name))
-				return true;
-		}
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚¦ã‚¹é»·ã‚¹ã‚¹ã‚¹ã‚¹Oã‚¹ãƒ•ãƒ‘ã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹é©ã‚¥ã‚¹ãƒŒã‚‘ã‚½ã‚¹ã‚¹ã‚¹
+    public boolean existPublicLabel(String name) {
+        for (int i = 0; i < size(); i++) {
+            PublicLabel8085 p = (PublicLabel8085) elementAt(i);
+            if (p.name.equals(name))
+                return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒAƒhƒŒƒX‚É‘Î‰‚·‚éƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ª‚ ‚é‚©‚Ç‚¤‚©
-	public boolean existPublicLabel(int addr) {
-		for (int i = 0; i < size(); i++) {
-			PublicLabel8085 p = (PublicLabel8085) elementAt(i);
-			if (p.addr == addr)
-				return true;
-		}
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚¦ã‚¹é»·ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒå¯¾ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹é©ã‚¥ã‚¹ãƒŒã‚‘ã‚½ã‚¹ã‚¹ã‚¹
+    public boolean existPublicLabel(int addr) {
+        for (int i = 0; i < size(); i++) {
+            PublicLabel8085 p = (PublicLabel8085) elementAt(i);
+            if (p.addr == addr)
+                return true;
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	// ***************************************************************************************************
-	// index ”Ô–Ú‚ÌƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ğ•Ô‚·
-	public PublicLabel8085 getPublicLabelAt(int index) {
-		return (PublicLabel8085) elementAt(index);
-	}
+    // ***************************************************************************************************
+    // index ã‚¹ãƒ¤ç›®ã®ãƒ‘ã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹
+    public PublicLabel8085 getPublicLabelAt(int index) {
+        return (PublicLabel8085) elementAt(index);
+    }
 
-	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒ‰ƒxƒ‹–¼‚É‘Î‰‚·‚éƒAƒhƒŒƒX‚ğ•Ô‚·
-	public int toPublicLabelAddr(String name) {
-		for (int i = 0; i < size(); i++)
-			if (((PublicLabel8085) elementAt(i)).name == name)
-				return ((PublicLabel8085) elementAt(i)).addr;
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚¦ã‚¹é»·ã‚¹ã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒå¯¾ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹
+    public int toPublicLabelAddr(String name) {
+        for (int i = 0; i < size(); i++)
+            if (((PublicLabel8085) elementAt(i)).name.equals(name))
+                return ((PublicLabel8085) elementAt(i)).addr;
 
-		// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çA-1 ‚ğ•Ô‚·iƒGƒ‰[Ij
-		// ‚±‚ÌŠÖ”‚ğg‚¤‚Æ‚«‚ÍA–‘O‚É existPublicLabel( name ) ‚Å‘¶İ‚ğŠm”F‚µ‚Ä‚¨‚­‚×‚«B
-		return -1;
-	}
+        // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹A-1 ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹ã‚¹iã‚¹Gã‚¹ã‚¹ã‚¹[ã‚¹Iã‚¹j
+        // ã‚¹ã‚¹ã‚¹ãƒ•é–¢æ’°ã‚½ã‚¹ã‚¹ã‚¹ã‚¹gã‚¹ã‚¹ã‚¹ãƒ‹ã‚‘ã‚½ã‚¹ã‚¹ãƒ˜ã€ã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ existPublicLabel( name )
+        // ã‚¹ãƒŠæ‰˜ã‚½ã‚¹ã‚¹ãƒ³ã‚‘ã‚½ã‚¹ã‚¹mã‚¹Fã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒ©ã‚‘ã‚½ã‚¹ã‚¹B
+        return -1;
+    }
 
-	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒAƒhƒŒƒX‚É‘Î‰‚·‚éƒ‰ƒxƒ‹–¼‚ğ•Ô‚·
-	public String toPublicLabelName(int addr) {
-		for (int i = 0; i < size(); i++)
-			if (((PublicLabel8085) elementAt(i)).addr == addr)
-				return ((PublicLabel8085) elementAt(i)).name;
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚¦ã‚¹é»·ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒå¯¾ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹é©›ä¼šã‚½ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹
+    public String toPublicLabelName(int addr) {
+        for (int i = 0; i < size(); i++)
+            if (((PublicLabel8085) elementAt(i)).addr == addr)
+                return ((PublicLabel8085) elementAt(i)).name;
 
-		// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çAnull ‚ğ•Ô‚·iƒGƒ‰[Ij
-		// ‚±‚ÌŠÖ”‚ğg‚¤‚Æ‚«‚ÍA–‘O‚É existPublicLabel( name ) ‚Å‘¶İ‚ğŠm”F‚µ‚Ä‚¨‚­‚×‚«B
-		return null;
-	}
+        // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Anull ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹ã‚¹iã‚¹Gã‚¹ã‚¹ã‚¹[ã‚¹Iã‚¹j
+        // ã‚¹ã‚¹ã‚¹ãƒ•é–¢æ’°ã‚½ã‚¹ã‚¹ã‚¹ã‚¹gã‚¹ã‚¹ã‚¹ãƒ‹ã‚‘ã‚½ã‚¹ã‚¹ãƒ˜ã€ã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ existPublicLabel( name )
+        // ã‚¹ãƒŠæ‰˜ã‚½ã‚¹ã‚¹ãƒ³ã‚‘ã‚½ã‚¹ã‚¹mã‚¹Fã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒ©ã‚‘ã‚½ã‚¹ã‚¹B
+        return null;
+    }
 
-	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒAƒhƒŒƒX‚É‘Î‰‚·‚éƒ‰ƒxƒ‹‚ğ•Ô‚·
-	public PublicLabel8085 toPublicLabel(int addr) {
-		for (int i = 0; i < size(); i++)
-			if (((PublicLabel8085) elementAt(i)).addr == addr)
-				return ((PublicLabel8085) elementAt(i));
+    // ***************************************************************************************************
+    // ã‚¹wã‚¹é–§ã‚¦ã‚¹é»·ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒå¯¾ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹é©›ä¼šã‚½ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹
+    public PublicLabel8085 toPublicLabel(int addr) {
+        for (int i = 0; i < size(); i++)
+            if (((PublicLabel8085) elementAt(i)).addr == addr)
+                return ((PublicLabel8085) elementAt(i));
 
-		// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çAnull ‚ğ•Ô‚·iƒGƒ‰[Ij
-		// ‚±‚ÌŠÖ”‚ğg‚¤‚Æ‚«‚ÍA–‘O‚É existPublicLabel( name ) ‚Å‘¶İ‚ğŠm”F‚µ‚Ä‚¨‚­‚×‚«B
-		return null;
-	}
+        // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Anull ã‚¹ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹ã‚¹iã‚¹Gã‚¹ã‚¹ã‚¹[ã‚¹Iã‚¹j
+        // ã‚¹ã‚¹ã‚¹ãƒ•é–¢æ’°ã‚½ã‚¹ã‚¹ã‚¹ã‚¹gã‚¹ã‚¹ã‚¹ãƒ‹ã‚‘ã‚½ã‚¹ã‚¹ãƒ˜ã€ã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ existPublicLabel( name )
+        // ã‚¹ãƒŠæ‰˜ã‚½ã‚¹ã‚¹ãƒ³ã‚‘ã‚½ã‚¹ã‚¹mã‚¹Fã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒ©ã‚‘ã‚½ã‚¹ã‚¹B
+        return null;
+    }
 
 }

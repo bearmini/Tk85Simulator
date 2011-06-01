@@ -1,4 +1,4 @@
-package deb8085.io;
+ï»¿package deb8085.io;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,7 +18,7 @@ public class RingBufferTest extends Frame implements ActionListener,
 
 	public RingBufferTest() {
 		buf = new RingBuffer(10);
-		// ƒ{[ƒ_[ƒŒƒCƒAƒEƒg‚ÅƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ”z’u
+		// ãƒœãƒ¼ãƒ€ãƒ¼ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã§ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’é…ç½®
 		setLayout(new BorderLayout());
 
 		Button buttonTest = new Button("TEST");
@@ -33,7 +33,7 @@ public class RingBufferTest extends Frame implements ActionListener,
 	public static void main(String args[]) {
 		RingBufferTest appli = new RingBufferTest();
 
-		appli.setTitle("ƒŠƒ“ƒOƒoƒbƒtƒ@“®ìŠm”F");
+		appli.setTitle("ãƒªãƒ³ã‚°ãƒãƒƒãƒ•ã‚¡å‹•ä½œç¢ºèª");
 		appli.pack();
 		appli.setVisible(true);
 	}

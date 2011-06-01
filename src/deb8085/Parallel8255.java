@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 public class Parallel8255 implements InputDevice, OutputDevice {
 
@@ -16,7 +16,7 @@ public class Parallel8255 implements InputDevice, OutputDevice {
 
 	static final int RESET = 0x00;
 
-	// ƒRƒ“ƒgƒ[ƒ‹ƒ[ƒh‚Éw’è‚·‚é’l
+	// ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ«ãƒ¯ãƒ¼ãƒ‰ã«æŒ‡å®šã™ã‚‹å€¤
 
 	static final int MODE_SET_MODE = 0x80;
 	static final int MODE_SET_BIT = 0x00;
@@ -48,12 +48,12 @@ public class Parallel8255 implements InputDevice, OutputDevice {
 	int pcl_io = PORT_CL_OUTPUT;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public Parallel8255() {
 	}
 
 	// ***************************************************************************************************
-	// ƒfƒoƒCƒX‚ğÚ‘±
+	// ãƒ‡ãƒã‚¤ã‚¹ã‚’æ¥ç¶š
 	public void assignInputDevice(int port, ParallelInputDevice input_dev) {
 		this.input_dev[port] = input_dev;
 	}
@@ -63,7 +63,7 @@ public class Parallel8255 implements InputDevice, OutputDevice {
 	}
 
 	// ***************************************************************************************************
-	// ƒ|[ƒg‚ÉÚ‘±‚³‚ê‚½ƒfƒoƒCƒX‚©‚ç“ü—Í
+	// ãƒãƒ¼ãƒˆã«æ¥ç¶šã•ã‚ŒãŸãƒ‡ãƒã‚¤ã‚¹ã‹ã‚‰å…¥åŠ›
 	public int in(int portnum) {
 		switch (portnum) {
 		case PORT_A: {

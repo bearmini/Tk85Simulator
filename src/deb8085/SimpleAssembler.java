@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -7,7 +7,7 @@ import deb8085.instr.*;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* 8085CPU –½—ßƒR[ƒh */
+/* 8085CPU å‘½ä»¤ã‚³ãƒ¼ãƒ‰ */
 class InstructionCode8085 {
 	int size;
 	int b1;
@@ -24,14 +24,14 @@ class InstructionCode8085 {
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-/* 8085CPU —p ƒGƒ“ƒR[ƒ_ */
+/* 8085CPU ç”¨ ã‚¨ãƒ³ã‚³ãƒ¼ãƒ€ */
 class Encoder8085 {
 	CPU8085 cpu;
 
-	// ƒGƒ“ƒR[ƒhƒe[ƒuƒ‹
+	// ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰ãƒ†ãƒ¼ãƒ–ãƒ«
 	Hashtable<String, Instruction8085> table = new Hashtable<String, Instruction8085>(256);
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public Encoder8085(CPU8085 cpu) {
 		this.cpu = cpu;
 
@@ -483,20 +483,20 @@ class Encoder8085 {
 				(byte) 1));
 	}
 
-	// 8085ƒCƒ“ƒXƒgƒ‰ƒNƒVƒ‡ƒ“ƒj[ƒ‚ƒjƒbƒN ¨ –½—ßƒR[ƒh—ñ
+	// 8085ã‚¤ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚·ãƒ§ãƒ³ãƒ‹ãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ â†’ å‘½ä»¤ã‚³ãƒ¼ãƒ‰åˆ—
 	public InstructionCode8085 encode(String opecode, String operand1,
 			String operand2) throws OnEncodeException {
-		// ‘å•¶š‰»‚·‚é
+		// å¤§æ–‡å­—åŒ–ã™ã‚‹
 		opecode = opecode.toUpperCase();
 		if (operand1 != null)
 			operand1 = operand1.toUpperCase();
 		if (operand2 != null)
 			operand2 = operand2.toUpperCase();
 
-		// ƒe[ƒuƒ‹‚©‚çƒj[ƒ‚ƒjƒbƒN‚É‘Î‰‚·‚é"–½—ß"(Instruction8085ƒNƒ‰ƒX)‚ğ“¾‚é
+		// ãƒ†ãƒ¼ãƒ–ãƒ«ã‹ã‚‰ãƒ‹ãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ã«å¯¾å¿œã™ã‚‹"å‘½ä»¤"(Instruction8085ã‚¯ãƒ©ã‚¹)ã‚’å¾—ã‚‹
 		Instruction8085 inst = (Instruction8085) table.get(opecode);
 
-		// “¾‚é‚Ì‚ğ¸”s‚µ‚½‚çAƒIƒyƒ‰ƒ“ƒh‚ğ‘«‚µ‚ÄÄ’§í
+		// å¾—ã‚‹ã®ã‚’å¤±æ•—ã—ãŸã‚‰ã€ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’è¶³ã—ã¦å†æŒ‘æˆ¦
 		if ((inst == null) && (operand1 != null)) {
 			inst = (Instruction8085) table.get(opecode + " " + operand1);
 
@@ -506,12 +506,12 @@ class Encoder8085 {
 		}
 
 		if (inst == null)
-			throw new OnEncodeException("•s³‚È–½—ß‚Å‚·.");
+			throw new OnEncodeException("ä¸æ­£ãªå‘½ä»¤ã§ã™.");
 
-		// Instruction8085 ƒNƒ‰ƒX‚ÌŠe–½—ß©‘Ì‚ÉAƒIƒyƒ‰ƒ“ƒh‚ğ‰ğß‚³‚¹‚é
+		// Instruction8085 ã‚¯ãƒ©ã‚¹ã®å„å‘½ä»¤è‡ªä½“ã«ã€ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’è§£é‡ˆã•ã›ã‚‹
 		inst.encode(operand1, operand2);
 
-		// ‰ğß‚³‚ê‚½ƒIƒyƒ‰ƒ“ƒh‚ğŠî‚ÉA–½—ßƒR[ƒh—ñ‚ğ¶¬‚µ‚Ä•Ô‚·
+		// è§£é‡ˆã•ã‚ŒãŸã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’åŸºã«ã€å‘½ä»¤ã‚³ãƒ¼ãƒ‰åˆ—ã‚’ç”Ÿæˆã—ã¦è¿”ã™
 		return new InstructionCode8085(inst.getSize(), inst.getOpecode(), inst
 				.getB2(), inst.getB3());
 
@@ -521,7 +521,7 @@ class Encoder8085 {
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-// ŠÈˆÕƒAƒZƒ“ƒuƒ‰
+// ç°¡æ˜“ã‚¢ã‚»ãƒ³ãƒ–ãƒ©
 public class SimpleAssembler {
 
 	Hashtable<String, Instruction8085> table = new Hashtable<String, Instruction8085>(256);
@@ -530,22 +530,22 @@ public class SimpleAssembler {
 	Encoder8085 encoder;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public SimpleAssembler(CPU8085 cpu) {
 		this.cpu = cpu;
 		encoder = new Encoder8085(cpu);
 	}
 
 	// ***************************************************************************************************
-	// ˆêsƒAƒZƒ“ƒuƒ‹
+	// ä¸€è¡Œã‚¢ã‚»ãƒ³ãƒ–ãƒ«
 	public int assemble(int codeaddr, String s) throws OnEncodeException {
-		StringTokenizer st = new StringTokenizer(s, " \t"); // ‹ó”’Aƒ^ƒu‚ğ‹æØ‚è‚Æ‚İ‚È‚·
+		StringTokenizer st = new StringTokenizer(s, " \t"); // ç©ºç™½ã€ã‚¿ãƒ–ã‚’åŒºåˆ‡ã‚Šã¨ã¿ãªã™
 		String opecode = null;
 		String operand = null;
 		String operand1 = null;
 		String operand2 = null;
 
-		// •¶š—ñ‚ğ–½—ß‚ÆƒIƒyƒ‰ƒ“ƒh‚É‘å‚«‚­•ª‰ğ
+		// æ–‡å­—åˆ—ã‚’å‘½ä»¤ã¨ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã«å¤§ããåˆ†è§£
 		if (st.hasMoreTokens()) {
 			opecode = st.nextToken();
 			if (st.hasMoreTokens())
@@ -553,9 +553,9 @@ public class SimpleAssembler {
 		}
 
 		if (operand != null) {
-			st = new StringTokenizer(operand, ","); // ƒRƒ“ƒ}‚ğ‹æØ‚è‚Æ‚İ‚È‚·
+			st = new StringTokenizer(operand, ","); // ã‚³ãƒ³ãƒã‚’åŒºåˆ‡ã‚Šã¨ã¿ãªã™
 
-			// ƒIƒyƒ‰ƒ“ƒh‚ğ“ñ‚Â‚É•ª‰ğ
+			// ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’äºŒã¤ã«åˆ†è§£
 			if (st.hasMoreTokens()) {
 				operand1 = st.nextToken();
 				if (st.hasMoreTokens())
@@ -563,11 +563,11 @@ public class SimpleAssembler {
 			}
 		}
 
-		// ƒIƒyƒ‰ƒ“ƒh‚ğ³‹K‰»iƒ‰ƒxƒ‹‚ğƒAƒhƒŒƒX‚É•ÏŠ·A”®‚ğ‰ğÍA2i”A8i”A10i”‚ğ‚·‚×‚Ä16i”‚É“ˆê)
+		// ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’æ­£è¦åŒ–ï¼ˆãƒ©ãƒ™ãƒ«ã‚’ã‚¢ãƒ‰ãƒ¬ã‚¹ã«å¤‰æ›ã€æ•°å¼ã‚’è§£æã€2é€²æ•°ã€8é€²æ•°ã€10é€²æ•°ã‚’ã™ã¹ã¦16é€²æ•°ã«çµ±ä¸€)
 		normalize(operand1);
 		normalize(operand2);
 
-		// ƒGƒ“ƒR[ƒh
+		// ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰
 		InstructionCode8085 inst;
 		try {
 			inst = encoder.encode(opecode, operand1, operand2);
@@ -575,10 +575,10 @@ public class SimpleAssembler {
 			throw e;
 		}
 
-		// –½—ßƒR[ƒh‚ğ‘‚«‚Ş
+		// å‘½ä»¤ã‚³ãƒ¼ãƒ‰ã‚’æ›¸ãè¾¼ã‚€
 		cpu.mem.setValue(codeaddr, inst.b1);
 
-		// –½—ßƒTƒCƒY‚É‚æ‚Á‚ÄA‚³‚ç‚É‚à‚¤ˆêƒoƒCƒg‚©“ñƒoƒCƒg‘‚«‚Ş
+		// å‘½ä»¤ã‚µã‚¤ã‚ºã«ã‚ˆã£ã¦ã€ã•ã‚‰ã«ã‚‚ã†ä¸€ãƒã‚¤ãƒˆã‹äºŒãƒã‚¤ãƒˆæ›¸ãè¾¼ã‚€
 		if (inst.size == 2)
 			cpu.mem.setValue(codeaddr + 1, inst.b2);
 		else if (inst.size == 3) {
@@ -586,12 +586,12 @@ public class SimpleAssembler {
 			cpu.mem.setValue(codeaddr + 2, inst.b3);
 		}
 
-		// –½—ßƒTƒCƒY‚ğ•Ô‚·
+		// å‘½ä»¤ã‚µã‚¤ã‚ºã‚’è¿”ã™
 		return inst.size;
 	}
 
 	// ***************************************************************************************************
-	// ƒIƒyƒ‰ƒ“ƒh‚ğ³‹K‰»iƒ‰ƒxƒ‹‚ğƒAƒhƒŒƒX‚É•ÏŠ·A”®‚ğ‰ğÍA2i”A8i”A10i”‚ğ‚·‚×‚Ä16i”‚É“ˆê)
+	// ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’æ­£è¦åŒ–ï¼ˆãƒ©ãƒ™ãƒ«ã‚’ã‚¢ãƒ‰ãƒ¬ã‚¹ã«å¤‰æ›ã€æ•°å¼ã‚’è§£æã€2é€²æ•°ã€8é€²æ•°ã€10é€²æ•°ã‚’ã™ã¹ã¦16é€²æ•°ã«çµ±ä¸€)
 	void normalize(String operand) {
 	}
 

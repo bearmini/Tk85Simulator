@@ -1,10 +1,10 @@
-package deb8085.instr;
+ï»¿package deb8085.instr;
 
 import deb8085.*;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* 8085 –½—ßƒR[ƒh */
+/* 8085 å‘½ä»¤ã‚³ãƒ¼ãƒ‰ */
 public abstract class Instruction8085 {
 	CPU8085 cpu;
 
@@ -18,7 +18,7 @@ public abstract class Instruction8085 {
 
 	private int b3b2;
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public Instruction8085(CPU8085 cpu, byte p1, String p2, byte p3) {
 		this.cpu = cpu;
 		opecode = p1;
@@ -28,92 +28,92 @@ public abstract class Instruction8085 {
 		setB3((short) 0);
 	}
 
-	// ’ŠÛƒƒ\ƒbƒh ‚±‚ÌƒNƒ‰ƒX‚ğŒp³‚·‚éƒNƒ‰ƒX‚ª•K‚¸ƒI[ƒo[ƒ‰ƒCƒh‚µ‚È‚­‚Ä‚Í‚È‚ç‚È‚¢B
+	// æŠ½è±¡ãƒ¡ã‚½ãƒƒãƒ‰ ã“ã®ã‚¯ãƒ©ã‚¹ã‚’ç¶™æ‰¿ã™ã‚‹ã‚¯ãƒ©ã‚¹ãŒå¿…ãšã‚ªãƒ¼ãƒãƒ¼ãƒ©ã‚¤ãƒ‰ã—ãªãã¦ã¯ãªã‚‰ãªã„ã€‚
 	public abstract void execute();
 
 	/*
-	 * Œ¾—t‚Ì’è‹`
+	 * è¨€è‘‰ã®å®šç¾©
 	 * 
 	 * 
-	 * ƒj[ƒ‚ƒjƒbƒN, mnemonic MVI A,01H ¨ MVI A HLT ¨ HLT CALL 01C0H ¨ CALL RST 6 ¨
-	 * RST 6 ‚È‚ÇAƒfƒR[ƒ_‚É’è‹`‚³‚ê‚Ä‚¢‚éA–½—ßƒR[ƒh‚PƒoƒCƒg‚Å‹æ•Ê‚³‚ê‚é‚à‚Ì
+	 * ãƒ‹ãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯, mnemonic MVI A,01H â†’ MVI A HLT â†’ HLT CALL 01C0H â†’ CALL RST 6 â†’
+	 * RST 6 ãªã©ã€ãƒ‡ã‚³ãƒ¼ãƒ€ã«å®šç¾©ã•ã‚Œã¦ã„ã‚‹ã€å‘½ä»¤ã‚³ãƒ¼ãƒ‰ï¼‘ãƒã‚¤ãƒˆã§åŒºåˆ¥ã•ã‚Œã‚‹ã‚‚ã®
 	 * 
-	 * ƒIƒyƒ‰ƒ“ƒh, operand MVI A,01H ¨ A HLT ¨ (‚È‚µ) CALL 01C0H ¨ (‚È‚µ) RST 6 ¨ 6
-	 * ‚È‚ÇAå‚ÉƒŒƒWƒXƒ^‚Ìw’èBŠe–½—ß‚Ì’†‚Å“®ì‚É‰e‹¿‚·‚é
+	 * ã‚ªãƒšãƒ©ãƒ³ãƒ‰, operand MVI A,01H â†’ A HLT â†’ (ãªã—) CALL 01C0H â†’ (ãªã—) RST 6 â†’ 6
+	 * ãªã©ã€ä¸»ã«ãƒ¬ã‚¸ã‚¹ã‚¿ã®æŒ‡å®šã€‚å„å‘½ä»¤ã®ä¸­ã§å‹•ä½œã«å½±éŸ¿ã™ã‚‹
 	 * 
 	 * 
-	 * –½—ßƒR[ƒh 32 F4 83 ‚È‚ÇA‚ ‚éˆê‚Â‚Ì–½—ß‚ğ‚ ‚ç‚í‚·‚½‚ß‚É•K—v‚ÈƒoƒCƒg‚ÌW‚Ü‚è
+	 * å‘½ä»¤ã‚³ãƒ¼ãƒ‰ 32 F4 83 ãªã©ã€ã‚ã‚‹ä¸€ã¤ã®å‘½ä»¤ã‚’ã‚ã‚‰ã‚ã™ãŸã‚ã«å¿…è¦ãªãƒã‚¤ãƒˆã®é›†ã¾ã‚Š
 	 * 
-	 * opecode –½—ßƒR[ƒh‚Ì’†‚ÅA1ƒoƒCƒg‚ß‚É‚ ‚èA–½—ß‚Ì“®ì‚ğ‚ ‚ç‚í‚·ƒoƒCƒg
+	 * opecode å‘½ä»¤ã‚³ãƒ¼ãƒ‰ã®ä¸­ã§ã€1ãƒã‚¤ãƒˆã‚ã«ã‚ã‚Šã€å‘½ä»¤ã®å‹•ä½œã‚’ã‚ã‚‰ã‚ã™ãƒã‚¤ãƒˆ
 	 */
 
-	// ƒGƒ“ƒR[ƒh
+	// ã‚¨ãƒ³ã‚³ãƒ¼ãƒ‰
 	public void encode(String operand1, String operand2)
 			throws OnEncodeException {
-		// ƒfƒtƒHƒ‹ƒg‚Å‚Í‰½‚à‚µ‚È‚¢
+		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã§ã¯ä½•ã‚‚ã—ãªã„
 	}
 
-	// •¶š—ñ‚É•ÏŠ·
+	// æ–‡å­—åˆ—ã«å¤‰æ›
 	public String toString() {
-		// ƒfƒtƒHƒ‹ƒg“®ì
+		// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå‹•ä½œ
 		return mnemonic;
 	}
 
-	// opecode ‚ğæ“¾
+	// opecode ã‚’å–å¾—
 	public byte getOpecode() {
 		return opecode;
 	}
 
-	// ƒj[ƒ‚ƒjƒbƒN‚ğæ“¾
+	// ãƒ‹ãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯ã‚’å–å¾—
 	public String getMnemonic() {
 		return mnemonic;
 	}
 
-	// ƒIƒyƒ‰ƒ“ƒh‚ğİ’è
+	// ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’è¨­å®š
 	public void setOperands(String newOperands) {
 		operands = newOperands;
 	}
 
-	// ƒIƒyƒ‰ƒ“ƒh‚ğæ“¾
+	// ã‚ªãƒšãƒ©ãƒ³ãƒ‰ã‚’å–å¾—
 	public String getOperands() {
 		return operands;
 	}
 
-	// –½—ßƒTƒCƒY‚ğæ“¾
+	// å‘½ä»¤ã‚µã‚¤ã‚ºã‚’å–å¾—
 	public byte getSize() {
 		return size;
 	}
 
-	// 2ƒoƒCƒg‚ß‚ğİ’è
+	// 2ãƒã‚¤ãƒˆã‚ã‚’è¨­å®š
 	public void setB2(short newB2) {
 		b2 = newB2;
 		b3b2 = (b3 << 8) + b2;
 	}
 
-	// 3ƒoƒCƒg‚ß‚ğİ’è
+	// 3ãƒã‚¤ãƒˆã‚ã‚’è¨­å®š
 	public void setB3(short newB3) {
 		b3 = newB3;
 		b3b2 = (b3 << 8) + b2;
 	}
 
-	// 2ƒoƒCƒg‚ßA3ƒoƒCƒg‚ß‚ğİ’è
+	// 2ãƒã‚¤ãƒˆã‚ã€3ãƒã‚¤ãƒˆã‚ã‚’è¨­å®š
 	public void setB3B2(int newB3B2) {
 		b3b2 = newB3B2;
 		b2 = (short) (newB3B2 & 0xFF);
 		b3 = (short) (newB3B2 >>> 8);
 	}
 
-	// 2ƒoƒCƒg‚ß‚ğæ“¾
+	// 2ãƒã‚¤ãƒˆã‚ã‚’å–å¾—
 	public short getB2() {
 		return b2;
 	}
 
-	// 3ƒoƒCƒg‚ß‚ğæ“¾
+	// 3ãƒã‚¤ãƒˆã‚ã‚’å–å¾—
 	public short getB3() {
 		return b3;
 	}
 
-	// 2ƒoƒCƒg‚ßA3ƒoƒCƒg‚ß‚ğæ“¾
+	// 2ãƒã‚¤ãƒˆã‚ã€3ãƒã‚¤ãƒˆã‚ã‚’å–å¾—
 	public int getB3B2() {
 		return b3b2;
 	}
@@ -134,8 +134,8 @@ public abstract class Instruction8085 {
 		return (val2 & 0x0F) > (val1 & 0x0F);
 	}
 
-	// •¶š—ñ‚ğƒŒƒWƒXƒ^’è”‚É‚·‚é
-	// "A" ‚È‚ç Reg8085.A ‚È‚Ç
+	// æ–‡å­—åˆ—ã‚’ãƒ¬ã‚¸ã‚¹ã‚¿å®šæ•°ã«ã™ã‚‹
+	// "A" ãªã‚‰ Reg8085.A ãªã©
 	static byte StringToReg(String reg) {
 		if (reg.equals("A"))
 			return Reg8085.A;

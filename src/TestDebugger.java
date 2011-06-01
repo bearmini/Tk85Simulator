@@ -1,11 +1,11 @@
-import java.awt.*;
+ï»¿import java.awt.*;
 import java.awt.event.*;
 
 import deb8085.*;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* ƒfƒoƒbƒK—p‚ÌƒtƒŒ[ƒ€ƒNƒ‰ƒX */
+/* ãƒ‡ãƒãƒƒã‚¬ç”¨ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‚¯ãƒ©ã‚¹ */
 public class TestDebugger extends Frame implements DebuggerParent,
 		ActionListener, WindowListener {
 	/**
@@ -13,7 +13,7 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	 */
 	private static final long serialVersionUID = -2444040100756005797L;
 
-	Debugger debugger; // ƒfƒoƒbƒK
+	Debugger debugger; // ãƒ‡ãƒãƒƒã‚¬
 
 	public TextArea output;
 
@@ -23,11 +23,11 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	boolean debuggingNow = false;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public TestDebugger() {
 		addWindowListener(this);
 
-		// ƒƒjƒ…[‚ğì¬
+		// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’ä½œæˆ
 		Menu mfile = new Menu("File");
 		MenuItem mniQuit = new MenuItem("Quit");
 		mniQuit.addActionListener(this);
@@ -47,17 +47,17 @@ public class TestDebugger extends Frame implements DebuggerParent,
 		mb.add(mdeb);
 		setMenuBar(mb);
 
-		// ƒ{[ƒ_[ƒŒƒCƒAƒEƒg‚ÅƒRƒ“ƒ|[ƒlƒ“ƒg‚ğ”z’u
+		// ãƒœãƒ¼ãƒ€ãƒ¼ãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆã§ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’é…ç½®
 		setLayout(new BorderLayout());
 
-		// Center•”•ª‚Éo—Í—Ìˆæ‚ğ’Ç‰Á
+		// Centeréƒ¨åˆ†ã«å‡ºåŠ›é ˜åŸŸã‚’è¿½åŠ 
 		output = new TextArea("", 25, 80);
 		add("Center", output);
 		output.setFont(new Font("SansSerif", Font.PLAIN, 20));
 	}
 
 	// ***************************************************************************************************
-	// ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+	// ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
 	public void windowOpened(WindowEvent e) {
 	}
 
@@ -92,11 +92,11 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒƒCƒ“
+	// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒ¡ã‚¤ãƒ³
 	public static void main(String args[]) {
 		TestDebugger window = new TestDebugger();
 
-		window.setTitle("ƒfƒoƒbƒK“®ìŠm”F");
+		window.setTitle("ãƒ‡ãƒãƒƒã‚¬å‹•ä½œç¢ºèª");
 		window.pack();
 		window.setVisible(true);
 
@@ -105,7 +105,7 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒfƒoƒbƒO‚ğŠJn
+	// ãƒ‡ãƒãƒƒã‚°ã‚’é–‹å§‹
 	public void startDebug() {
 		if (debuggingNow)
 			return;
@@ -120,7 +120,7 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒfƒoƒbƒO‚ğ‹­§I—¹
+	// ãƒ‡ãƒãƒƒã‚°ã‚’å¼·åˆ¶çµ‚äº†
 	public void stopDebug() {
 		if (!debuggingNow)
 			return;
@@ -130,12 +130,12 @@ public class TestDebugger extends Frame implements DebuggerParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒfƒoƒbƒOŠJn
+	// ãƒ‡ãƒãƒƒã‚°é–‹å§‹æ™‚
 	public void onBeginDebug() {
 	}
 
 	// ***************************************************************************************************
-	// ƒfƒoƒbƒOI—¹
+	// ãƒ‡ãƒãƒƒã‚°çµ‚äº†æ™‚
 	public void onEndDebug() {
 		debuggingNow = false;
 		mniStart.setEnabled(true);

@@ -1,10 +1,10 @@
-package deb8085.instr;
+ï»¿package deb8085.instr;
 
 import deb8085.CPU8085;
 import deb8085.Reg8085;
 
 //***************************************************************************************************
-/* DAA –½—ß */
+/* DAA å‘½ä»¤ */
 public class InstructionDAA extends Instruction8085 {
 	public InstructionDAA(CPU8085 cpu, byte p1, String p2, byte p3) {
 		super(cpu, p1, p2, p3);
@@ -14,8 +14,8 @@ public class InstructionDAA extends Instruction8085 {
 		short regAorg = cpu.reg.getReg(Reg8085.A);
 		short bcd;
 
-		// ’¼‘O‚Ì–½—ß‚É‚æ‚Á‚ÄA‰ÁZ•â³‚à‚µ‚­‚ÍŒ¸Z•â³‚ğs‚¤
-		// iƒÊPD8085AC ‚Í 8085 ‚Æˆá‚Á‚ÄAŒ¸ZŒã‚Ì BCD •â³‚à‚Å‚«‚éj
+		// ç›´å‰ã®å‘½ä»¤ã«ã‚ˆã£ã¦ã€åŠ ç®—è£œæ­£ã‚‚ã—ãã¯æ¸›ç®—è£œæ­£ã‚’è¡Œã†
+		// ï¼ˆÎ¼PD8085AC ã¯ 8085 ã¨é•ã£ã¦ã€æ¸›ç®—å¾Œã® BCD è£œæ­£ã‚‚ã§ãã‚‹ï¼‰
 		if (!cpu.subtractedFlag) {
 			bcd = bcdAdd(regAorg);
 		} else {

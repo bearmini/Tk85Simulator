@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -42,7 +42,7 @@ PortC 6 |-----+       |       |
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* TK85 ƒL[ƒ{[ƒh ƒNƒ‰ƒX */
+/* TK85 ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ ã‚¯ãƒ©ã‚¹ */
 public class TK85Keyboard extends Panel implements ParallelInputDevice,
 		ParallelOutputDevice, MouseListener, ItemListener {
 	/**
@@ -50,25 +50,25 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	 */
 	private static final long serialVersionUID = -7487546109493618329L;
 
-	// TK85 ƒVƒ~ƒ…ƒŒ[ƒ^
+	// TK85 ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿
 	public TK85Simulator simulator;
 
-	// Œ»İ‰Ÿ‚³‚ê‚Ä‚¢‚éƒ{ƒ^ƒ“‚ÌƒL[ƒR[ƒh
+	// ç¾åœ¨æŠ¼ã•ã‚Œã¦ã„ã‚‹ãƒœã‚¿ãƒ³ã®ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰
 	int currKeyCode = 0xFF;
 
-	// ‘I‘ğ‚³‚ê‚Ä‚¢‚éƒ‰ƒCƒ“
+	// é¸æŠã•ã‚Œã¦ã„ã‚‹ãƒ©ã‚¤ãƒ³
 	int line;
 
-	// ƒŠƒZƒbƒgƒ{ƒ^ƒ“
+	// ãƒªã‚»ãƒƒãƒˆãƒœã‚¿ãƒ³
 	Button btnReset;
 
-	// ƒXƒeƒbƒvÀs‘I‘ğƒXƒCƒbƒ`
+	// ã‚¹ãƒ†ãƒƒãƒ—å®Ÿè¡Œé¸æŠã‚¹ã‚¤ãƒƒãƒ
 	Checkbox cbStep;
 
-	// ƒ{ƒ^ƒ“
+	// ãƒœã‚¿ãƒ³
 	TK85Button buttons[] = new TK85Button[25];
 
-	// ƒ{ƒ^ƒ“‚ÌƒLƒƒƒvƒVƒ‡ƒ“
+	// ãƒœã‚¿ãƒ³ã®ã‚­ãƒ£ãƒ—ã‚·ãƒ§ãƒ³
 	String buttonLabel[] = {
 	/* Line 1 */"0", "1", "2", "3", "4", "5", "6", "7",
 	/* Line 2 */"8", "9", "A", "B", "C", "D", "E", "F",
@@ -76,7 +76,7 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 			"MODE", "REG",
 			/* Special */"MON" };
 
-	// ƒ{ƒ^ƒ“’è”
+	// ãƒœã‚¿ãƒ³å®šæ•°
 	static final int BUTTON_0 = 0;
 	static final int BUTTON_1 = 1;
 	static final int BUTTON_2 = 2;
@@ -104,14 +104,14 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	static final int BUTTON_MON = 24;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public TK85Keyboard() {
 		setLayout(new BorderLayout(10, 10));
 
 		Panel pnlResetAndStep = new Panel();
 		Panel pnlButtons = new Panel();
 
-		// ƒ{ƒ^ƒ“¶¬E“\‚è•t‚¯
+		// ãƒœã‚¿ãƒ³ç”Ÿæˆãƒ»è²¼ã‚Šä»˜ã‘
 		pnlButtons.setLayout(new GridLayout(5, 5));
 
 		for (int i = 0; i < 25; i++) {
@@ -145,13 +145,13 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 		pnlButtons.add(buttons[BUTTON_3]);
 		pnlButtons.add(buttons[BUTTON_WRENT]);
 
-		// ƒŠƒZƒbƒgƒ{ƒ^ƒ“¶¬E“\‚è•t‚¯
+		// ãƒªã‚»ãƒƒãƒˆãƒœã‚¿ãƒ³ç”Ÿæˆãƒ»è²¼ã‚Šä»˜ã‘
 		pnlResetAndStep.setLayout(new BorderLayout());
 		btnReset = new Button("Reset");
 		btnReset.addMouseListener(this);
 		pnlResetAndStep.add("East", btnReset);
 
-		// ƒXƒeƒbƒvÀsƒ‰ƒWƒIƒ{ƒ^ƒ“¶¬E“\‚è•t‚¯
+		// ã‚¹ãƒ†ãƒƒãƒ—å®Ÿè¡Œãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³ç”Ÿæˆãƒ»è²¼ã‚Šä»˜ã‘
 		cbStep = new Checkbox("Step", false);
 		cbStep.addItemListener(this);
 		pnlResetAndStep.add("West", cbStep);
@@ -161,19 +161,19 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	}
 
 	// ***************************************************************************************************
-	// 8255 ‚©‚ç‚Ìo—Í
+	// 8255 ã‹ã‚‰ã®å‡ºåŠ›
 	public void out(int val) {
 		select(val);
 	}
 
 	// ***************************************************************************************************
-	// 8255 ‚Ö‚Ì“ü—Í
+	// 8255 ã¸ã®å…¥åŠ›
 	public int in() {
 		return scan();
 	}
 
 	// ***************************************************************************************************
-	// 8255 ‚É‚æ‚éƒ‰ƒCƒ“‘I‘ğ
+	// 8255 ã«ã‚ˆã‚‹ãƒ©ã‚¤ãƒ³é¸æŠ
 	static final int PC4 = 0xEF;
 	static final int PC5 = 0xDF;
 	static final int PC6 = 0xBF;
@@ -195,9 +195,9 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	}
 
 	// ***************************************************************************************************
-	// ‰Ÿ‚³‚ê‚Ä‚¢‚éƒL[‚ğƒXƒLƒƒƒ“ 8255 ‚É“n‚·Œ`®
+	// æŠ¼ã•ã‚Œã¦ã„ã‚‹ã‚­ãƒ¼ã‚’ã‚¹ã‚­ãƒ£ãƒ³ 8255 ã«æ¸¡ã™å½¢å¼
 	public int scan() {
-		// ‘I‘ğ‚³‚ê‚Ä‚¢‚éƒ‰ƒCƒ“‚É‚æ‚Á‚Äê‡•ª‚¯
+		// é¸æŠã•ã‚Œã¦ã„ã‚‹ãƒ©ã‚¤ãƒ³ã«ã‚ˆã£ã¦å ´åˆåˆ†ã‘
 		switch (line) {
 		case 1:
 			if (currKeyCode < 8)
@@ -223,40 +223,40 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	}
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒXƒŠƒXƒi ‚Æ‚µ‚Ä‚ÌƒCƒ“ƒvƒŠƒƒ“ƒg
+	// ãƒã‚¦ã‚¹ãƒªã‚¹ãƒŠ ã¨ã—ã¦ã®ã‚¤ãƒ³ãƒ—ãƒªãƒ¡ãƒ³ãƒˆ
 	// ***************************************************************************************************
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒX‚ªƒNƒŠƒbƒN‚³‚ê‚½‚ç
+	// ãƒã‚¦ã‚¹ãŒã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‚‰
 	public void mouseClicked(MouseEvent e) {
 	}
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒX‚ª‰Ÿ‚³‚ê‚½‚ç
+	// ãƒã‚¦ã‚¹ãŒæŠ¼ã•ã‚ŒãŸã‚‰
 	public void mousePressed(MouseEvent e) {
 		if (e.getComponent() instanceof TK85Button) {
-			// ‰Ÿ‚³‚ê‚½ƒL[‚ÌƒL[ƒR[ƒh‚ğ“o˜^
+			// æŠ¼ã•ã‚ŒãŸã‚­ãƒ¼ã®ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’ç™»éŒ²
 			currKeyCode = ((TK85Button) e.getComponent()).keycode;
 		}
 	}
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒX‚ª—£‚³‚ê‚½‚ç
+	// ãƒã‚¦ã‚¹ãŒé›¢ã•ã‚ŒãŸã‚‰
 	public void mouseReleased(MouseEvent e) {
 		if (e.getComponent() instanceof TK85Button) {
-			// ƒL[ƒR[ƒh‚ğ "‰½‚à‰Ÿ‚³‚ê‚Ä‚¢‚È‚¢" ‚É‚·‚é
+			// ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’ "ä½•ã‚‚æŠ¼ã•ã‚Œã¦ã„ãªã„" ã«ã™ã‚‹
 			currKeyCode = 0xFF;
 		}
 
 		if (e.getComponent() instanceof TK85Button) {
-			// MON ƒL[‚ª‰Ÿ‚³‚ê‚½‚ç
+			// MON ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰
 			if (((TK85Button) e.getComponent()).getLabel().equals("MON"))
 				if (simulator != null) {
 					simulator.cpu.interruptTRAP();
 					simulator.restart();
 				}
 		} else if (e.getComponent() instanceof Button) {
-			// Reset ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚ç
+			// Reset ãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã‚‰
 			if (((Button) e.getComponent()).getLabel().equals("Reset"))
 				if (simulator != null) {
 					simulator.cpu.reset();
@@ -267,24 +267,24 @@ public class TK85Keyboard extends Panel implements ParallelInputDevice,
 	}
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒX‚ª“ü‚Á‚Ä‚«‚½‚ç
+	// ãƒã‚¦ã‚¹ãŒå…¥ã£ã¦ããŸã‚‰
 	public void mouseEntered(MouseEvent e) {
 	}
 
 	// ***************************************************************************************************
-	// ƒ}ƒEƒX‚ªo‚Ä‚¢‚Á‚½‚ç
+	// ãƒã‚¦ã‚¹ãŒå‡ºã¦ã„ã£ãŸã‚‰
 	public void mouseExited(MouseEvent e) {
 	}
 
 	// ***************************************************************************************************
-	// ƒAƒCƒeƒ€ƒŠƒXƒi ‚Æ‚µ‚Ä‚ÌƒCƒ“ƒvƒŠƒƒ“ƒg
+	// ã‚¢ã‚¤ãƒ†ãƒ ãƒªã‚¹ãƒŠ ã¨ã—ã¦ã®ã‚¤ãƒ³ãƒ—ãƒªãƒ¡ãƒ³ãƒˆ
 	// ***************************************************************************************************
 
 	// ***************************************************************************************************
-	// ƒ`ƒFƒbƒNƒ{ƒbƒNƒX‚Ìó‘Ô‚ª•ÏX‚³‚ê‚½‚ç
+	// ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ã®çŠ¶æ…‹ãŒå¤‰æ›´ã•ã‚ŒãŸã‚‰
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getItemSelectable() instanceof Checkbox)
-			// Step ƒ`ƒFƒbƒNƒ{ƒbƒNƒX‚ª•ÏX‚³‚ê‚½‚ç
+			// Step ãƒã‚§ãƒƒã‚¯ãƒœãƒƒã‚¯ã‚¹ãŒå¤‰æ›´ã•ã‚ŒãŸã‚‰
 			if (((Checkbox) e.getItemSelectable()).getLabel().equals("Step"))
 				simulator.step = ((Checkbox) e.getItemSelectable()).getState();
 	}

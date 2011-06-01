@@ -1,4 +1,4 @@
-import java.awt.*;
+ï»¿import java.awt.*;
 import java.awt.event.*;
 import java.io.DataInputStream;
 import java.io.BufferedInputStream;
@@ -9,7 +9,7 @@ import deb8085.*;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* ƒVƒ~ƒ…ƒŒ[ƒ^—p‚ÌƒtƒŒ[ƒ€ƒNƒ‰ƒX */
+/* ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿ç”¨ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‚¯ãƒ©ã‚¹ */
 public class TestTK85Simulator extends Frame implements SimulatorParent,
 		ActionListener, WindowListener {
 	/**
@@ -17,20 +17,20 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	 */
 	private static final long serialVersionUID = 6695598103208111051L;
 	
-	TK85Simulator simulator; // TK85ƒVƒ~ƒ…ƒŒ[ƒ^
+	TK85Simulator simulator; // TK85ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿
 	TK85LED led;
 	TK85Keyboard kb;
 
 	final int DMA_BASEADDR_LED = 0x83f8;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public TestTK85Simulator() {
 		addWindowListener(this);
 
 		setBackground(Color.green.darker().darker());
 
-		// ƒƒjƒ…[‚ğì¬
+		// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’ä½œæˆ
 		Menu mfile = new Menu("File");
 		MenuItem mniLoad = new MenuItem("Load");
 		MenuItem mniQuit = new MenuItem("Quit");
@@ -49,15 +49,15 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 		setLayout(new BorderLayout());
 		setFont(new Font("SansSerif", Font.PLAIN, 16));
 
-		// LED ‚ğ¶¬A“\‚è•t‚¯
+		// LED ã‚’ç”Ÿæˆã€è²¼ã‚Šä»˜ã‘
 		led = new TK85LED(DMA_BASEADDR_LED);
 		add("North", led);
 
-		// ƒL[ƒ{[ƒh‚ğ¶¬A“\‚è•t‚¯
+		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‚’ç”Ÿæˆã€è²¼ã‚Šä»˜ã‘
 		kb = new TK85Keyboard();
 		add("Center", kb);
 
-		// ƒ_ƒ~[‚ÌƒXƒy[ƒT‚ğ‚¢‚ê‚é
+		// ãƒ€ãƒŸãƒ¼ã®ã‚¹ãƒšãƒ¼ã‚µã‚’ã„ã‚Œã‚‹
 		add("West", new Panel());
 		add("East", new Panel());
 		add("South", new Panel());
@@ -65,7 +65,7 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒCƒxƒ“ƒgƒnƒ“ƒhƒ‰
+	// ã‚¤ãƒ™ãƒ³ãƒˆãƒãƒ³ãƒ‰ãƒ©
 	public void windowOpened(WindowEvent e) {
 	}
 
@@ -103,11 +103,11 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ÌƒƒCƒ“
+	// ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã®ãƒ¡ã‚¤ãƒ³
 	public static void main(String args[]) {
 		TestTK85Simulator window = new TestTK85Simulator();
 
-		window.setTitle("TK85ƒVƒ~ƒ…ƒŒ[ƒ^ “®ìŠm”F");
+		window.setTitle("TK85ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿ å‹•ä½œç¢ºèª");
 		window.pack();
 		window.setVisible(true);
 
@@ -116,7 +116,7 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“ŠJn
+	// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³é–‹å§‹
 	public void startSimulation() {
 		simulator = new TK85Simulator(led, kb);
 		simulator.start();
@@ -124,12 +124,12 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	}
 
 	// ***************************************************************************************************
-	// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ªI‚í‚Á‚½‚ç
+	// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒçµ‚ã‚ã£ãŸã‚‰
 	public void onEndSimulation() {
 	}
 
 	// ***************************************************************************************************
-	// ƒtƒ@ƒCƒ‹–¼‚ğƒ_ƒCƒAƒƒO‚ğ—p‚¢‚Äæ“¾
+	// ãƒ•ã‚¡ã‚¤ãƒ«åã‚’ãƒ€ã‚¤ã‚¢ãƒ­ã‚°ã‚’ç”¨ã„ã¦å–å¾—
 	String getFilename() {
 		FileDialog fd = new FileDialog(this, "Open MIC File");
 		fd.setVisible(true);
@@ -140,33 +140,33 @@ public class TestTK85Simulator extends Frame implements SimulatorParent,
 	}
 
 	// ***************************************************************************************************
-	// MICƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
+	// MICãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚€
 	public void loadMicFile(String filename) throws IOException {
 		if (filename == null)
 			return;
 
-		// ƒtƒ@ƒCƒ‹‚ğƒI[ƒvƒ“
+		// ãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚ªãƒ¼ãƒ—ãƒ³
 		DataInputStream d = new DataInputStream(new BufferedInputStream(
 				new FileInputStream(filename)));
 
-		// ƒtƒ@ƒCƒ‹ ID ‚Ìƒ`ƒFƒbƒN
+		// ãƒ•ã‚¡ã‚¤ãƒ« ID ã®ãƒã‚§ãƒƒã‚¯
 		byte id1 = d.readByte();
 		byte id2 = d.readByte();
 		if (!(id1 == 80/* 'P' */&& id2 == 72/* 'H' */)) {
 			throw new IOException();
 		}
 
-		// ƒR[ƒh—Ìˆæƒf[ƒ^‚Ìæ“¾
+		// ã‚³ãƒ¼ãƒ‰é ˜åŸŸãƒ‡ãƒ¼ã‚¿ã®å–å¾—
 		int codeAddr = util.swapEndian(d.readUnsignedShort());
 		int codeSize = util.swapEndian(d.readUnsignedShort());
 		
-		// ì‹Æ—Ìˆæƒf[ƒ^‚Í MIC ƒtƒ@ƒCƒ‹‚É“ü‚Á‚Ä‚¢‚é‚ª¡‚Ì‚Æ‚±‚ëƒTƒ|[ƒg‚µ‚È‚¢‚Ì‚Å“Ç‚İÌ‚Ä
+		// ä½œæ¥­é ˜åŸŸãƒ‡ãƒ¼ã‚¿ã¯ MIC ãƒ•ã‚¡ã‚¤ãƒ«ã«å…¥ã£ã¦ã„ã‚‹ãŒä»Šã®ã¨ã“ã‚ã‚µãƒãƒ¼ãƒˆã—ãªã„ã®ã§èª­ã¿æ¨ã¦
 		@SuppressWarnings("unused")
 		int workSize = d.readUnsignedShort();
 		@SuppressWarnings("unused")
 		int workAddr = d.readUnsignedShort();
 
-		// ƒR[ƒh‚ğæ“¾‚µA¢ƒƒ‚ƒŠ£ ‚ÉŠi”[
+		// ã‚³ãƒ¼ãƒ‰ã‚’å–å¾—ã—ã€ã€Œãƒ¡ãƒ¢ãƒªã€ ã«æ ¼ç´
 		for (int addr = codeAddr; addr < codeAddr + codeSize; addr++)
 			simulator.mem.setValue(addr, d.readUnsignedByte());
 

@@ -1,10 +1,10 @@
-package deb8085.instr;
+ï»¿package deb8085.instr;
 
 import deb8085.CPU8085;
 import deb8085.Reg8085;
 
 //***************************************************************************************************
-/* PCHL –½—ß */
+/* PCHL å‘½ä»¤ */
 public class InstructionPCHL extends Instruction8085 {
 	public InstructionPCHL(CPU8085 cpu, byte p1, String p2, byte p3) {
 		super(cpu, p1, p2, p3);
@@ -17,8 +17,8 @@ public class InstructionPCHL extends Instruction8085 {
 		cpu.reg.setReg(Reg8085.HL, valPC);
 		cpu.reg.setReg(Reg8085.PC, valHL);
 
-		// ‚±‚Ì–½—ß©‘Ì‚É‚æ‚Á‚Ä PC ‚Ì’l‚ª•Ï‚í‚Á‚Ä‚µ‚Ü‚¤‚Ì‚Å
-		// Ÿ‚Ìs‚Í—v‚ç‚È‚¢
+		// ã“ã®å‘½ä»¤è‡ªä½“ã«ã‚ˆã£ã¦ PC ã®å€¤ãŒå¤‰ã‚ã£ã¦ã—ã¾ã†ã®ã§
+		// æ¬¡ã®è¡Œã¯è¦ã‚‰ãªã„
 		// cpu.incPC( getSize() );
 	}
 

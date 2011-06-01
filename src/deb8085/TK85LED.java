@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.awt.FlowLayout;
 import java.awt.Panel;
@@ -10,30 +10,30 @@ public class TK85LED extends Panel implements DMADevice {
 	private static final long serialVersionUID = 2580635679994682988L;
 	
 	LED7Seg led[];
-	Panel addr = new Panel(); // ƒAƒhƒŒƒX•\¦—p LED ‚ÌƒRƒ“ƒeƒi
-	Panel data = new Panel(); // ƒf[ƒ^ •\¦—p LED ‚ÌƒRƒ“ƒeƒi
+	Panel addr = new Panel(); // ã‚¢ãƒ‰ãƒ¬ã‚¹è¡¨ç¤ºç”¨ LED ã®ã‚³ãƒ³ãƒ†ãƒŠ
+	Panel data = new Panel(); // ãƒ‡ãƒ¼ã‚¿ è¡¨ç¤ºç”¨ LED ã®ã‚³ãƒ³ãƒ†ãƒŠ
 
 	int dma_baseaddr;
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public TK85LED(int dma_baseaddr) {
-		// DMA ‚Ìƒx[ƒXƒAƒhƒŒƒX
+		// DMA ã®ãƒ™ãƒ¼ã‚¹ã‚¢ãƒ‰ãƒ¬ã‚¹
 		this.dma_baseaddr = dma_baseaddr;
 
-		// LED ‚ğ8ŒÂ¶¬
+		// LED ã‚’8å€‹ç”Ÿæˆ
 		led = new LED7Seg[8];
 		for (int i = 0; i < 8; i++)
 			led[i] = new LED7Seg();
 
-		// ƒAƒhƒŒƒX•\¦—p LED ‚ğ“\‚è•t‚¯‚é
+		// ã‚¢ãƒ‰ãƒ¬ã‚¹è¡¨ç¤ºç”¨ LED ã‚’è²¼ã‚Šä»˜ã‘ã‚‹
 		for (int i = 0; i < 4; i++)
 			addr.add(led[i]);
 
-		// ƒf[ƒ^•\¦—p LED ‚ğ“\‚è•t‚¯‚é
+		// ãƒ‡ãƒ¼ã‚¿è¡¨ç¤ºç”¨ LED ã‚’è²¼ã‚Šä»˜ã‘ã‚‹
 		for (int i = 4; i < 8; i++)
 			data.add(led[i]);
 
-		// ‚»‚ê‚¼‚ê‚ÌƒRƒ“ƒeƒi‚ğ“\‚è•t‚¯‚é
+		// ãã‚Œãã‚Œã®ã‚³ãƒ³ãƒ†ãƒŠã‚’è²¼ã‚Šä»˜ã‘ã‚‹
 		FlowLayout fl = new FlowLayout();
 		fl.setHgap(10);
 		setLayout(fl);
@@ -42,10 +42,10 @@ public class TK85LED extends Panel implements DMADevice {
 	}
 
 	/*
-	 * public TK85LED( LayoutManager layout ) { // w’è‚³‚ê‚½ƒŒƒCƒAƒEƒgƒ}ƒl[ƒWƒƒ‚ğ–³‹ setLayout(
+	 * public TK85LED( LayoutManager layout ) { // æŒ‡å®šã•ã‚ŒãŸãƒ¬ã‚¤ã‚¢ã‚¦ãƒˆãƒãƒãƒ¼ã‚¸ãƒ£ã‚’ç„¡è¦– setLayout(
 	 * new FlowLayout() );
 	 * 
-	 * this.TK85LED(); // ‚±‚ê‚ª‚Å‚«‚é‚©? }
+	 * this.TK85LED(); // ã“ã‚ŒãŒã§ãã‚‹ã‹? }
 	 */
 	public void onMemoryModified(int addr, short val) {
 		led[addr - dma_baseaddr].setSegData(val);

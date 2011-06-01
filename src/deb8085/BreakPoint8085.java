@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 public class BreakPoint8085 {
 	int addr;
@@ -13,7 +13,7 @@ public class BreakPoint8085 {
 		if (this.addr == addr && count == 0)
 			return true;
 		else {
-			count--; // ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ªQÆ‚³‚ê‚½
+			count--; // ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆãŒå‚ç…§ã•ã‚ŒãŸ
 			return false;
 		}
 	}

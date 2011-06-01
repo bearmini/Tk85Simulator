@@ -1,9 +1,9 @@
-package deb8085.instr;
+ï»¿package deb8085.instr;
 
 import deb8085.*;
 
 //***************************************************************************************************
-/* CALL –½—ßŒn */
+/* CALL å‘½ä»¤ç³» */
 public class InstructionCALL extends Instruction8085 {
 	public InstructionCALL(CPU8085 cpu, byte p1, String p2, byte p3) {
 		super(cpu, p1, p2, p3);
@@ -34,7 +34,7 @@ public class InstructionCALL extends Instruction8085 {
 
 		if (conditionOK) {
 			int sp = cpu.reg.getReg(Reg8085.SP);
-			int pc = cpu.reg.getReg(Reg8085.PC) + getSize();// –½—ßÄŠJƒAƒhƒŒƒX‚ÍA‚±‚ÌCall–½—ß‚ÌŸ‚Ì–½—ß‚ÌƒAƒhƒŒƒX
+			int pc = cpu.reg.getReg(Reg8085.PC) + getSize();// å‘½ä»¤å†é–‹ã‚¢ãƒ‰ãƒ¬ã‚¹ã¯ã€ã“ã®Callå‘½ä»¤ã®æ¬¡ã®å‘½ä»¤ã®ã‚¢ãƒ‰ãƒ¬ã‚¹
 			short pcH = (short) ((pc & 0xFF00) >>> 8);
 			short pcL = (short) (pc & 0x00FF);
 
@@ -59,7 +59,7 @@ public class InstructionCALL extends Instruction8085 {
 	public void encode(String operand1, String operand2)
 			throws OnEncodeException {
 		if (operand1 == null)
-			throw new OnEncodeException("•s³‚ÈƒIƒyƒ‰ƒ“ƒhi‚P‚Â‚ßj");
+			throw new OnEncodeException("ä¸æ­£ãªã‚ªãƒšãƒ©ãƒ³ãƒ‰ï¼ˆï¼‘ã¤ã‚ï¼‰");
 		int addr = util.unhex(operand1);
 		setB2((short) (addr % 0x100));
 		setB3((short) (addr / 0x100));

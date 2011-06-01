@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.util.StringTokenizer;
 
@@ -6,67 +6,67 @@ import deb8085.instr.*;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* 8085 CPU ƒGƒ~ƒ…ƒŒ[ƒ^ƒNƒ‰ƒX */
+/* 8085 CPU ã‚¨ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿ã‚¯ãƒ©ã‚¹ */
 public class CPU8085 {
-	public Reg8085 reg; // ƒŒƒWƒXƒ^
-	public Mem8085 mem; // ƒƒ‚ƒŠ—Ìˆæ
-	public Decoder8085 dec; // ƒfƒR[ƒ_
-	public IOPort8085 ioport; // I/Oƒ|[ƒg
+	public Reg8085 reg; // ãƒ¬ã‚¸ã‚¹ã‚¿
+	public Mem8085 mem; // ãƒ¡ãƒ¢ãƒªé ˜åŸŸ
+	public Decoder8085 dec; // ãƒ‡ã‚³ãƒ¼ãƒ€
+	public IOPort8085 ioport; // I/Oãƒãƒ¼ãƒˆ
 
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹
+	// ãƒ‘ãƒ–ãƒªãƒƒã‚¯ãƒ©ãƒ™ãƒ«
 	public PublicLabelList publicLabels;
 
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg
+	// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆ
 	public BreakPointList breakPoints;
 
-	private boolean halted = false; // CPU ‚Í’â~‚µ‚Ä‚¢‚é‚©
+	private boolean halted = false; // CPU ã¯åœæ­¢ã—ã¦ã„ã‚‹ã‹
 
 	private int instructions_per_tick = 0;
 
-	short oldAreg; // ƒtƒ‰ƒO•Ï‰»‚Ì‚Æ‚«QÆ‚·‚é‚½‚ß‚É•Û‘¶‚µ‚Ä‚¨‚­A–½—ßÀs‘O‚Ì A ƒŒƒWƒXƒ^
+	short oldAreg; // ãƒ•ãƒ©ã‚°å¤‰åŒ–ã®ã¨ãå‚ç…§ã™ã‚‹ãŸã‚ã«ä¿å­˜ã—ã¦ãŠãã€å‘½ä»¤å®Ÿè¡Œå‰ã® A ãƒ¬ã‚¸ã‚¹ã‚¿
 	public boolean subtractedFlag; // DAA
-	// ‚ğÀs‚·‚é‚Æ‚«A‰ÁZ‚Ì10i•â³‚ğ‚·‚é‚©(false)AŒ¸Z‚Ì10i•â³‚ğ‚·‚é‚©(true)
-	public boolean interruptEnabled; // Š„‚è‚İ‚ª‹–‰Â‚³‚ê‚Ä‚¢‚é‚©
+	// ã‚’å®Ÿè¡Œã™ã‚‹ã¨ãã€åŠ ç®—ã®10é€²è£œæ­£ã‚’ã™ã‚‹ã‹(false)ã€æ¸›ç®—ã®10é€²è£œæ­£ã‚’ã™ã‚‹ã‹(true)
+	public boolean interruptEnabled; // å‰²ã‚Šè¾¼ã¿ãŒè¨±å¯ã•ã‚Œã¦ã„ã‚‹ã‹
 
-	// Š„‚è‚Ü‚ê‚½‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN‚·‚éƒtƒ‰ƒO
+	// å‰²ã‚Šè¾¼ã¾ã‚ŒãŸã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯ã™ã‚‹ãƒ•ãƒ©ã‚°
 	boolean interruptedTRAP = false;
 	boolean interruptedRST75 = false;
 	boolean interruptedRST65 = false;
 	boolean interruptedRST55 = false;
 	boolean interruptedINTR = false;
 
-	// Š„‚è‚İƒ}ƒXƒN
+	// å‰²ã‚Šè¾¼ã¿ãƒã‚¹ã‚¯
 	public boolean interruptMaskedRST75 = false;
 	public boolean interruptMaskedRST65 = false;
 	public boolean interruptMaskedRST55 = false;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public CPU8085(Mem8085 mem, PublicLabelList publicLabels,
 			BreakPointList breakPoints) {
-		// CPU“àƒp[ƒciƒŒƒWƒXƒ^‚ÆƒfƒR[ƒ_‚ÆI/Oƒ|[ƒgj‚ğ¶¬
+		// CPUå†…ãƒ‘ãƒ¼ãƒ„ï¼ˆãƒ¬ã‚¸ã‚¹ã‚¿ã¨ãƒ‡ã‚³ãƒ¼ãƒ€ã¨I/Oãƒãƒ¼ãƒˆï¼‰ã‚’ç”Ÿæˆ
 		reg = new Reg8085(this);
 		dec = new Decoder8085(this);
 		ioport = new IOPort8085(this);
 
-		// ƒƒ‚ƒŠ‚Ö‚ÌQÆ‚ğæ“¾
+		// ãƒ¡ãƒ¢ãƒªã¸ã®å‚ç…§ã‚’å–å¾—
 		this.mem = mem;
 
-		// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹ƒŠƒXƒg‚Ö‚ÌQÆ‚ğæ“¾
+		// ãƒ‘ãƒ–ãƒªãƒƒã‚¯ãƒ©ãƒ™ãƒ«ãƒªã‚¹ãƒˆã¸ã®å‚ç…§ã‚’å–å¾—
 		this.publicLabels = publicLabels;
 
-		// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒgƒŠƒXƒg‚Ö‚ÌQÆ‚ğæ“¾
+		// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆãƒªã‚¹ãƒˆã¸ã®å‚ç…§ã‚’å–å¾—
 		this.breakPoints = breakPoints;
 	}
 
 	// ***************************************************************************************************
-	// ‚P–½—ßæ“¾ Œ»İ‚Ì PC ’l‚ÌˆÊ’u‚©‚ç–½—ß‚ğƒtƒFƒbƒ`
+	// ï¼‘å‘½ä»¤å–å¾— ç¾åœ¨ã® PC å€¤ã®ä½ç½®ã‹ã‚‰å‘½ä»¤ã‚’ãƒ•ã‚§ãƒƒãƒ
 	public short fetch() {
 		return mem.getValue(reg.getReg(Reg8085.PC));
 	}
 
 	// ***************************************************************************************************
-	// 1–½—ßƒfƒR[ƒh
+	// 1å‘½ä»¤ãƒ‡ã‚³ãƒ¼ãƒ‰
 	public Instruction8085 decode(short code) {
 		Instruction8085 inst = dec.decode(code);
 		if (inst.getSize() == 2)
@@ -79,12 +79,12 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// ‚P–½—ßÀs
+	// ï¼‘å‘½ä»¤å®Ÿè¡Œ
 	public void execute(Instruction8085 inst) throws OnBreakPointException {
 		if (isHalted())
 			return;
 
-		// –½—ßÀs€”õ
+		// å‘½ä»¤å®Ÿè¡Œæº–å‚™
 		StringTokenizer st = new StringTokenizer(inst.getMnemonic(), " ");
 		@SuppressWarnings("unused")
 		String opecode = st.nextToken();  // this cannot be removed!
@@ -99,7 +99,7 @@ public class CPU8085 {
 
 		saveAreg();
 
-		// –½—ßÀs
+		// å‘½ä»¤å®Ÿè¡Œ
 		synchronized (this) {
 			inst.execute();
 		}
@@ -114,7 +114,7 @@ public class CPU8085 {
 			instructions_per_tick = 0;
 		}
 
-		// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚Ìƒ`ƒFƒbƒN
+		// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆã®ãƒã‚§ãƒƒã‚¯
 		if (breakPoints != null) {
 			if (breakPoints.existBreakPoint(reg.getReg(Reg8085.PC))) {
 				halted = true;
@@ -122,16 +122,16 @@ public class CPU8085 {
 						+ util.hex4(reg.getReg(Reg8085.PC)) + ".");
 			}
 		}
-		// Š„‚è‚İƒtƒ‰ƒO‚ÌƒŠƒZƒbƒg
+		// å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°ã®ãƒªã‚»ãƒƒãƒˆ
 		resetInterruptFlag();
 
 	}
 
 	// ***************************************************************************************************
-	// Š„‚è‚İƒtƒ‰ƒO‚ÌƒŠƒZƒbƒg
+	// å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°ã®ãƒªã‚»ãƒƒãƒˆ
 	public void resetInterruptFlag() {
-		// Š„‚è‚İƒtƒ‰ƒO‚ğ–ß‚·
-		// ‚Ä‚¢‚¤‚©A—Dæ‡ˆÊ‚Ì’á‚¢Š„‚è‚İ‚ÍAó—‚³‚ê‚é‚Ü‚Å–ß‚³‚È‚¢H
+		// å‰²ã‚Šè¾¼ã¿ãƒ•ãƒ©ã‚°ã‚’æˆ»ã™
+		// ã¦ã„ã†ã‹ã€å„ªå…ˆé †ä½ã®ä½ã„å‰²ã‚Šè¾¼ã¿ã¯ã€å—ç†ã•ã‚Œã‚‹ã¾ã§æˆ»ã•ãªã„ï¼Ÿ
 		interruptedTRAP = false;
 		interruptedRST75 = false;
 		interruptedRST65 = false;
@@ -140,13 +140,13 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// Š„‚è‚İ
+	// å‰²ã‚Šè¾¼ã¿
 	// ***************************************************************************************************
 
 	// ***************************************************************************************************
-	// Š„‚è‚İŒã‚ÌƒŠƒ^[ƒ“ƒAƒhƒŒƒX‚ğƒXƒ^ƒbƒN‚É•Û‘¶
+	// å‰²ã‚Šè¾¼ã¿å¾Œã®ãƒªã‚¿ãƒ¼ãƒ³ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’ã‚¹ã‚¿ãƒƒã‚¯ã«ä¿å­˜
 	void saveReturnAddr() {
-		// Š„‚è‚İ‚ğ‹Ö~II
+		// å‰²ã‚Šè¾¼ã¿ã‚’ç¦æ­¢ï¼ï¼
 		interruptEnabled = false;
 
 		int sp = reg.getReg(Reg8085.SP);
@@ -160,7 +160,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// TRAP Š„‚è‚İ
+	// TRAP å‰²ã‚Šè¾¼ã¿
 	public void interruptTRAP() {
 		interruptedTRAP = true;
 		reg.setReg(Reg8085.PC, 0x0024);
@@ -168,7 +168,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// RST7.5 Š„‚è‚İ
+	// RST7.5 å‰²ã‚Šè¾¼ã¿
 	public void interruptRST75() {
 		if (interruptEnabled && !interruptMaskedRST75 && !interruptedTRAP) {
 			saveReturnAddr();
@@ -179,7 +179,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// RST6.5 Š„‚è‚İ
+	// RST6.5 å‰²ã‚Šè¾¼ã¿
 	public void interruptRST65() {
 		if (interruptEnabled && !interruptMaskedRST65 && !interruptedTRAP
 				&& !interruptedRST75) {
@@ -191,7 +191,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// RST5.5 Š„‚è‚İ
+	// RST5.5 å‰²ã‚Šè¾¼ã¿
 	public void interruptRST55() {
 		if (interruptEnabled && !interruptMaskedRST55 && !interruptedTRAP
 				&& !interruptedRST75 && !interruptedRST65) {
@@ -203,7 +203,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// INTR Š„‚è‚İ
+	// INTR å‰²ã‚Šè¾¼ã¿
 	public void interruptINTR(int addr) {
 		if (interruptEnabled && !interruptedTRAP && !interruptedRST75
 				&& !interruptedRST65 && !interruptedRST55) {
@@ -215,7 +215,7 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// CPU ‚ğ Reset ‚·‚é
+	// CPU ã‚’ Reset ã™ã‚‹
 	public void reset() {
 		reg.setReg(Reg8085.PC, 0x0000);
 		interruptEnabled = false;
@@ -223,31 +223,31 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// CPU ‚Í Halt ‚³‚ê‚Ä‚¢‚é‚©
+	// CPU ã¯ Halt ã•ã‚Œã¦ã„ã‚‹ã‹
 	public boolean isHalted() {
 		return halted;
 	}
 
 	// ***************************************************************************************************
-	// CPU ‚ğ Halt ‚·‚é
+	// CPU ã‚’ Halt ã™ã‚‹
 	public void halt() {
 		halted = true;
 	}
 
 	// ***************************************************************************************************
-	// CPU ‚Ì Halt ‚ğ‰ğœ‚·‚é
+	// CPU ã® Halt ã‚’è§£é™¤ã™ã‚‹
 	public void restart() {
 		halted = false;
 	}
 
 	// ***************************************************************************************************
-	// ƒvƒƒOƒ‰ƒ€ƒJƒEƒ“ƒ^‚ğ d ‘‚â‚·
+	// ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚«ã‚¦ãƒ³ã‚¿ã‚’ d å¢—ã‚„ã™
 	public void incPC(int d) {
 		reg.setReg(Reg8085.PC, reg.getReg(Reg8085.PC) + d);
 	}
 
 	// ***************************************************************************************************
-	// ƒtƒ‰ƒOXV’è”
+	// ãƒ•ãƒ©ã‚°æ›´æ–°å®šæ•°
 	public final static int FLAGUPDATE_ALL = 0x01;
 	public final static int FLAGUPDATE_NO_CARRY = 0x02;
 	public final static int FLAGUPDATE_CARRY_ONLY = 0x04;
@@ -258,7 +258,7 @@ public class CPU8085 {
 	public final static int FLAGUPDATE_SET_SUBTRUCTED = 0x100;
 	public final static int FLAGUPDATE_RESET_SUBTRUCTED = 0x200;
 
-	// ƒtƒ‰ƒO‚ÌXV
+	// ãƒ•ãƒ©ã‚°ã®æ›´æ–°
 	public void updateFlags(int status) {
 		if ((status & FLAGUPDATE_ALL) != 0) {
 			reg.setFlag(Reg8085.Zf, reg.getReg(Reg8085.A) == 0);
@@ -279,7 +279,7 @@ public class CPU8085 {
 
 	}
 
-	// ƒtƒ‰ƒO‚ÌXV(INR/DCR—p)
+	// ãƒ•ãƒ©ã‚°ã®æ›´æ–°(INR/DCRç”¨)
 	public void updateFlags(int status, byte r) {
 		short regVal = reg.getReg(r);
 
@@ -288,14 +288,14 @@ public class CPU8085 {
 			reg.setFlag(Reg8085.Sf, regVal > 0x7F);
 			reg.setFlag(Reg8085.Pf, parityCheck(regVal));
 
-			/* AC ƒtƒ‰ƒO‚Ì‹““®‚Í•s–¾ */
+			/* AC ãƒ•ãƒ©ã‚°ã®æŒ™å‹•ã¯ä¸æ˜ */
 			reg.setFlag(Reg8085.ACf,
 					(reg.getReg(Reg8085.A) & 0x08) != (oldAreg & 0x08));
 		}
 	}
 
 	// ***************************************************************************************************
-	// ƒpƒŠƒeƒBƒ`ƒFƒbƒN ‹ô”‚Ì‚Æ‚«‚É 1(true)
+	// ãƒ‘ãƒªãƒ†ã‚£ãƒã‚§ãƒƒã‚¯ å¶æ•°ã®ã¨ãã« 1(true)
 	public boolean parityCheck(short regA) {
 		int cnt;
 		for (cnt = 0; regA != 0; regA >>>= 1)
@@ -305,12 +305,12 @@ public class CPU8085 {
 	}
 
 	// ***************************************************************************************************
-	// A ƒŒƒWƒXƒ^•Û‘¶
+	// A ãƒ¬ã‚¸ã‚¹ã‚¿ä¿å­˜
 	public void saveAreg() {
 		oldAreg = reg.getReg(Reg8085.A);
 	}
 
-	// A ƒŒƒWƒXƒ^•œ‹A
+	// A ãƒ¬ã‚¸ã‚¹ã‚¿å¾©å¸°
 	public void restoreAreg() {
 		reg.setReg(Reg8085.A, oldAreg);
 	}
@@ -319,14 +319,14 @@ public class CPU8085 {
 
 // ***************************************************************************************************
 // ***************************************************************************************************
-/* 8085CPU —p ƒfƒR[ƒ_ */
+/* 8085CPU ç”¨ ãƒ‡ã‚³ãƒ¼ãƒ€ */
 class Decoder8085 {
 	CPU8085 cpu;
 
-	// ƒfƒR[ƒhƒe[ƒuƒ‹
+	// ãƒ‡ã‚³ãƒ¼ãƒ‰ãƒ†ãƒ¼ãƒ–ãƒ«
 	Instruction8085 table[] = new Instruction8085[256];
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public Decoder8085(CPU8085 cpu) {
 		this.cpu = cpu;
 
@@ -590,7 +590,7 @@ class Decoder8085 {
 
 	}
 
-	// –½—ßƒR[ƒh ¨ 8085ƒCƒ“ƒXƒgƒ‰ƒNƒVƒ‡ƒ“ƒj[ƒ‚ƒjƒbƒN
+	// å‘½ä»¤ã‚³ãƒ¼ãƒ‰ â†’ 8085ã‚¤ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚·ãƒ§ãƒ³ãƒ‹ãƒ¼ãƒ¢ãƒ‹ãƒƒã‚¯
 	public Instruction8085 decode(short opecode) {
 		return table[opecode];
 	}

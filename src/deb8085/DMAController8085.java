@@ -1,8 +1,8 @@
-package deb8085;
+ï»¿package deb8085;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* 8085 CPU —p DMAƒRƒ“ƒgƒ[ƒ‰ ƒNƒ‰ƒX */
+/* 8085 CPU ç”¨ DMAã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ© ã‚¯ãƒ©ã‚¹ */
 public class DMAController8085 {
 	CPU8085 cpu;
 	DMADevice dev;
@@ -10,36 +10,36 @@ public class DMAController8085 {
 	int startaddr;
 	int size;
 
-	// ƒƒ‚ƒŠŠÄ‹”äŠr—p
+	// ãƒ¡ãƒ¢ãƒªç›£è¦–æ™‚æ¯”è¼ƒç”¨
 	short memoryOld[];
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public DMAController8085(CPU8085 cpu) {
 		this.cpu = cpu;
 	}
 
 	// ***************************************************************************************************
-	// DMA ƒfƒoƒCƒX‚ğŠ„‚è“–‚Ä‚é
+	// DMA ãƒ‡ãƒã‚¤ã‚¹ã‚’å‰²ã‚Šå½“ã¦ã‚‹
 	public void assignDMADevice(DMADevice dev, int startaddr, int size) {
 		this.dev = dev;
 		this.startaddr = startaddr;
 		this.size = size;
 
-		// ŠÄ‹”äŠr—pƒf[ƒ^‚ğæ“¾
+		// ç›£è¦–æ™‚æ¯”è¼ƒç”¨ãƒ‡ãƒ¼ã‚¿ã‚’å–å¾—
 		memoryOld = new short[size];
 		for (int addr = startaddr; addr < startaddr + size; addr++)
 			memoryOld[addr - startaddr] = cpu.mem.getValue(addr);
 	}
 
 	// ***************************************************************************************************
-	// ŠÄ‹ƒƒ‚ƒŠ—Ìˆæ‚ª•ÏX‚³‚ê‚½‚©
+	// ç›£è¦–ãƒ¡ãƒ¢ãƒªé ˜åŸŸãŒå¤‰æ›´ã•ã‚ŒãŸã‹
 	public boolean isMemoryModified(int addr) {
 		return memoryOld[addr - startaddr] != cpu.mem.getValue(addr);
 	}
 
 	// ***************************************************************************************************
-	// ŠÄ‹ƒƒ‚ƒŠ—Ìˆæ‚ª•ÏX‚³‚ê‚½‚ç
+	// ç›£è¦–ãƒ¡ãƒ¢ãƒªé ˜åŸŸãŒå¤‰æ›´ã•ã‚ŒãŸã‚‰
 	public void memoryModifyCheck() {
 		if (dev == null)
 			return;

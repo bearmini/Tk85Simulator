@@ -1,4 +1,4 @@
-import java.applet.Applet;
+ï»¿import java.applet.Applet;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -13,7 +13,7 @@ public class Tk85SimulatorApplet extends Applet {
 	 */
 	private static final long serialVersionUID = 8112550200725052568L;
 	
-	TK85Simulator simulator; // TK85ƒVƒ~ƒ…ƒŒ[ƒ^
+	TK85Simulator simulator; // TK85ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿
 	TK85LED led;
 	TK85Keyboard kb;
 	final int DMA_BASEADDR_LED = 0x83f8;
@@ -23,11 +23,11 @@ public class Tk85SimulatorApplet extends Applet {
 		setLayout(new BorderLayout());
 		setFont(new Font("SansSerif", Font.PLAIN, 16));
 
-		// LED ‚ğ¶¬A“\‚è•t‚¯
+		// LED ã‚’ç”Ÿæˆã€è²¼ã‚Šä»˜ã‘
 		led = new TK85LED(DMA_BASEADDR_LED);
 		add("North", led);
 
-		// ƒL[ƒ{[ƒh‚ğ¶¬A“\‚è•t‚¯
+		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‚’ç”Ÿæˆã€è²¼ã‚Šä»˜ã‘
 		kb = new TK85Keyboard();
 		add("Center", kb);
 

@@ -1,16 +1,16 @@
-package deb8085;
+ï»¿package deb8085;
 
 //***************************************************************************************************
 //***************************************************************************************************
-// ƒ†[ƒeƒBƒŠƒeƒBŠÖ”ŒQ
+// ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£é–¢æ•°ç¾¤
 public class util {
 
-	// ‚QƒoƒCƒg®”‚ÌƒGƒ“ƒfƒBƒAƒ“‚ð‹t‚É‚·‚é
+	// ï¼’ãƒã‚¤ãƒˆæ•´æ•°ã®ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã‚’é€†ã«ã™ã‚‹
 	public static int swapEndian(int x) {
 		return ((x & 0xFF00) >>> 8) + ((x & 0xFF) << 8);
 	}
 
-	// “n‚³‚ê‚½®”‚ð\˜Zi”‚SŒ…•\Œ»‚É‚·‚é
+	// æ¸¡ã•ã‚ŒãŸæ•´æ•°ã‚’åå…­é€²æ•°ï¼”æ¡è¡¨ç¾ã«ã™ã‚‹
 	public static String hex4(int x) {
 		int x0, x1, x2, x3;
 
@@ -23,7 +23,7 @@ public class util {
 				+ Character.forDigit(x1, 16) + Character.forDigit(x0, 16);
 	}
 
-	// “n‚³‚ê‚½®”‚ð\˜Zi”‚QŒ…•\Œ»‚É‚·‚é
+	// æ¸¡ã•ã‚ŒãŸæ•´æ•°ã‚’åå…­é€²æ•°ï¼’æ¡è¡¨ç¾ã«ã™ã‚‹
 	public static String hex2(int x) {
 		int x0, x1;
 
@@ -33,7 +33,7 @@ public class util {
 		return "" + Character.forDigit(x1, 16) + Character.forDigit(x0, 16);
 	}
 
-	// \˜Zi”‹t•ÏŠ·
+	// åå…­é€²æ•°é€†å¤‰æ›
 	public static int unhex(String hex) {
 		if (hex == null)
 			return 0;
@@ -54,14 +54,14 @@ public class util {
 		return result & 0xFFFF;
 	}
 
-	// ƒfƒtƒHƒ‹ƒg’l•t‚«‚Ì\˜Zi”‹t•ÏŠ·
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ä»˜ãã®åå…­é€²æ•°é€†å¤‰æ›
 	/*
 	 * public static int unhex( String hex, int default ) { hex.trim();
 	 * 
 	 * if( hex.equals("") ) return default; else return unhex(hex); }
 	 */
 
-	// Žw’è‚³‚ê‚½ŒÂ”‚ÌƒXƒy[ƒX‚ð•Ô‚·
+	// æŒ‡å®šã•ã‚ŒãŸå€‹æ•°ã®ã‚¹ãƒšãƒ¼ã‚¹ã‚’è¿”ã™
 	public static String space(int n) {
 		String result = "";
 
@@ -71,7 +71,7 @@ public class util {
 		return result;
 	}
 
-	// Žw’è‚³‚ê‚½ƒAƒXƒL[ƒR[ƒh‚ð‚à‚Â•¶Žš‚ð•¶Žš—ñ‚É‚µ‚Ä•Ô‚·
+	// æŒ‡å®šã•ã‚ŒãŸã‚¢ã‚¹ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’ã‚‚ã¤æ–‡å­—ã‚’æ–‡å­—åˆ—ã«ã—ã¦è¿”ã™
 	public static char makeValidChar(char a) {
 		if (' ' <= a && a <= '~')
 			return a;
@@ -79,12 +79,12 @@ public class util {
 			return '.';
 	}
 
-	// ƒrƒbƒg‚ª—§‚Á‚Ä‚¢‚é‚©‚Ç‚¤‚©ƒ`ƒFƒbƒN‚·‚é
+	// ãƒ“ãƒƒãƒˆãŒç«‹ã£ã¦ã„ã‚‹ã‹ã©ã†ã‹ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 	public static boolean bitOn(int x, int bit) {
 		return ((x & (1 << bit)) != 0);
 	}
 
-	// ƒrƒbƒg‚ð‚½‚Ä‚é
+	// ãƒ“ãƒƒãƒˆã‚’ãŸã¦ã‚‹
 	public static int setBit(int x, int bit, boolean set) {
 		if (set)
 			return (x | (1 << bit));

@@ -1,4 +1,4 @@
-package deb8085.io;
+ï»¿package deb8085.io;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -6,10 +6,10 @@ import java.awt.event.KeyListener;
 import java.io.InputStream;
 import java.lang.String;
 
-/* ƒL[ƒ{[ƒh“ü—ÍƒXƒgƒŠ[ƒ€ */
+/* ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰å…¥åŠ›ã‚¹ãƒˆãƒªãƒ¼ãƒ  */
 
 public class KeyboardInputStream extends InputStream implements KeyListener {
-	TextArea console; // ƒeƒLƒXƒgƒGƒŠƒA‚ª“ü—Í¥o—Í‚ÌƒRƒ“ƒ\[ƒ‹‚Ì–ğŠ„‚ğ‰Ê‚½‚·
+	TextArea console; // ãƒ†ã‚­ã‚¹ãƒˆã‚¨ãƒªã‚¢ãŒå…¥åŠ›ãƒ»å‡ºåŠ›ã®ã‚³ãƒ³ã‚½ãƒ¼ãƒ«ã®å½¹å‰²ã‚’æœãŸã™
 
 	final static int MAX_OF_INPUTBUFFER = 100;
 	RingBuffer inputBuffer;
@@ -20,7 +20,7 @@ public class KeyboardInputStream extends InputStream implements KeyListener {
 	boolean enabled = true;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public KeyboardInputStream(TextArea console) {
 		this.console = console;
 		inputBuffer = new RingBuffer(MAX_OF_INPUTBUFFER);
@@ -28,30 +28,30 @@ public class KeyboardInputStream extends InputStream implements KeyListener {
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒGƒR[ ‚È‚µ
+	// ã‚­ãƒ¼ã‚¨ã‚³ãƒ¼ ãªã—
 	public void echoOff() {
 		echo = false;
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒGƒR[ ‚ ‚è
+	// ã‚­ãƒ¼ã‚¨ã‚³ãƒ¼ ã‚ã‚Š
 	public void echoOn() {
 		echo = true;
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒ{[ƒh‚©‚çˆê•¶š‚ğ“ü—Í
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‹ã‚‰ä¸€æ–‡å­—ã‚’å…¥åŠ›
 	public int read() {
 		while (inputBuffer.isEmpty())
-			; // ‚±‚Ì‹óƒ‹[ƒv‚ÅƒL[“ü—Í‚ğ‘Ò‚Â
+			; // ã“ã®ç©ºãƒ«ãƒ¼ãƒ—ã§ã‚­ãƒ¼å…¥åŠ›ã‚’å¾…ã¤
 		return inputBuffer.get();
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒ{[ƒh‚©‚ç•¶š—ñ‚ğ“ü—Í
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‹ã‚‰æ–‡å­—åˆ—ã‚’å…¥åŠ›
 	public String readln() {
 		while (!enterPressed)
-			; // ƒŠƒ^[ƒ“ƒL[‚ª‰Ÿ‚³‚ê‚é‚Ü‚Å‘Ò‚Â
+			; // ãƒªã‚¿ãƒ¼ãƒ³ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã‚‹ã¾ã§å¾…ã¤
 
 		enterPressed = false;
 		String result = "";
@@ -59,72 +59,72 @@ public class KeyboardInputStream extends InputStream implements KeyListener {
 		while (!inputBuffer.isEmpty())
 			result += (char) inputBuffer.get();
 
-		// “ü—Íƒoƒbƒtƒ@ƒNƒŠƒA
+		// å…¥åŠ›ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒªã‚¢
 		inputBuffer.flush();
 
 		return result;
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒ{[ƒh‚©‚ç‚Ì“ü—Í‚ğ —LŒø ‚É‚·‚é
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‹ã‚‰ã®å…¥åŠ›ã‚’ æœ‰åŠ¹ ã«ã™ã‚‹
 	public void enable() {
 		enabled = true;
 	}
 
 	// ***************************************************************************************************
-	// ƒL[ƒ{[ƒh‚©‚ç‚Ì“ü—Í‚ğ –³Œø ‚É‚·‚é
+	// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‹ã‚‰ã®å…¥åŠ›ã‚’ ç„¡åŠ¹ ã«ã™ã‚‹
 	public void disable() {
 		enabled = false;
 	}
 
 	// ***************************************************************************************************
-	// ƒL[‚ª‰Ÿ‚³‚ê‚Ä•ú‚³‚ê‚½‚ç
+	// ã‚­ãƒ¼ãŒæŠ¼ã•ã‚Œã¦æ”¾ã•ã‚ŒãŸã‚‰
 	public void keyTyped(KeyEvent e) {
 		char k;
 
-		// ƒL[‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚ÉA•s—v‚ÈƒL[‚Æ”»’f‚³‚ê‚½‚È‚ç ‰½–‚à‚È‚©‚Á‚½‚©‚Ì‚æ‚¤‚ÉƒŠƒ^[ƒ“
+		// ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã¨ãã«ã€ä¸è¦ãªã‚­ãƒ¼ã¨åˆ¤æ–­ã•ã‚ŒãŸãªã‚‰ ä½•äº‹ã‚‚ãªã‹ã£ãŸã‹ã®ã‚ˆã†ã«ãƒªã‚¿ãƒ¼ãƒ³
 		if (consumed || e.isConsumed())
 			return;
 
-		// ‰Ÿ‚³‚ê‚½ƒL[‚ğæ“¾
+		// æŠ¼ã•ã‚ŒãŸã‚­ãƒ¼ã‚’å–å¾—
 		k = e.getKeyChar();
 
 		switch (k) {
-		// ƒoƒbƒNƒXƒy[ƒX‚ª‰Ÿ‚³‚ê‚Ä‚¢‚½‚çA“ü—Íƒoƒbƒtƒ@‚ğ–ß‚é
+		// ãƒãƒƒã‚¯ã‚¹ãƒšãƒ¼ã‚¹ãŒæŠ¼ã•ã‚Œã¦ã„ãŸã‚‰ã€å…¥åŠ›ãƒãƒƒãƒ•ã‚¡ã‚’æˆ»ã‚‹
 		case '\b':
 			inputBuffer.back();
 			break;
 
-		// •’Ê‚ÌƒL[‚È‚çƒoƒbƒtƒ@‚É‘«‚·
+		// æ™®é€šã®ã‚­ãƒ¼ãªã‚‰ãƒãƒƒãƒ•ã‚¡ã«è¶³ã™
 		default:
 			inputBuffer.put(k);
 			break;
 
 		}
 
-		// ƒGƒR[‚µ‚È‚¢‚Æ‚«
+		// ã‚¨ã‚³ãƒ¼ã—ãªã„ã¨ã
 		if (!echo)
 			e.consume();
 
 	}
 
 	// ***************************************************************************************************
-	// ƒL[‚ª‰Ÿ‚³‚ê‚½‚ç
+	// ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰
 	public void keyPressed(KeyEvent e) {
 		consumed = false;
 		enterPressed = false;
 
-		// Enable ‚Å‚È‚¯‚ê‚Î“®ì‚µ‚È‚¢
+		// Enable ã§ãªã‘ã‚Œã°å‹•ä½œã—ãªã„
 		if (!enabled) {
 			e.consume();
 			consumed = true;
 			return;
 		}
 
-		// ƒL[ƒR[ƒh‚ğ“Ç‚İ‚Ş
+		// ã‚­ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’èª­ã¿è¾¼ã‚€
 		int keycode = e.getKeyCode();
 
-		// ƒŠƒ^[ƒ“ƒL[‚ª‰Ÿ‚³‚ê‚½‚ç
+		// ãƒªã‚¿ãƒ¼ãƒ³ã‚­ãƒ¼ãŒæŠ¼ã•ã‚ŒãŸã‚‰
 		if (keycode == KeyEvent.VK_ENTER) {
 			enterPressed = true;
 			if (!echo)
@@ -132,19 +132,19 @@ public class KeyboardInputStream extends InputStream implements KeyListener {
 			consumed = true;
 		}
 
-		// ƒoƒbƒtƒ@‚ÌŒÀŠE‚É’B‚µ‚½‚Æ‚« ƒoƒbƒNƒXƒy[ƒXƒL[ˆÈŠO‚ÌƒL[‚¾‚Á‚½‚ç
+		// ãƒãƒƒãƒ•ã‚¡ã®é™ç•Œã«é”ã—ãŸã¨ã ãƒãƒƒã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ä»¥å¤–ã®ã‚­ãƒ¼ã ã£ãŸã‚‰
 		if (inputBuffer.isFull() && keycode != KeyEvent.VK_BACK_SPACE) {
 			e.consume();
 			consumed = true;
 		}
 
-		// ƒoƒbƒNƒXƒy[ƒX‚Å–ß‚è‚·‚¬‚é‚Ì‚ğ–h‚®
+		// ãƒãƒƒã‚¯ã‚¹ãƒšãƒ¼ã‚¹ã§æˆ»ã‚Šã™ãã‚‹ã®ã‚’é˜²ã
 		if (inputBuffer.isEmpty() && keycode == KeyEvent.VK_BACK_SPACE) {
 			e.consume();
 			consumed = true;
 		}
 
-		// –îˆóƒL[‚È‚Ç‚Å•Ï‚È•ûŒü‚És‚Á‚Ä‚µ‚Ü‚¤‚Ì‚ğ–h‚®
+		// çŸ¢å°ã‚­ãƒ¼ãªã©ã§å¤‰ãªæ–¹å‘ã«è¡Œã£ã¦ã—ã¾ã†ã®ã‚’é˜²ã
 		if (keycode == KeyEvent.VK_UP || keycode == KeyEvent.VK_DOWN
 				|| keycode == KeyEvent.VK_LEFT || keycode == KeyEvent.VK_RIGHT
 				|| keycode == KeyEvent.VK_PAGE_DOWN
@@ -157,7 +157,7 @@ public class KeyboardInputStream extends InputStream implements KeyListener {
 	}
 
 	// ***************************************************************************************************
-	// ƒL[‚ª•ú‚³‚ê‚½‚ç
+	// ã‚­ãƒ¼ãŒæ”¾ã•ã‚ŒãŸã‚‰
 	public void keyReleased(KeyEvent e) {
 	}
 

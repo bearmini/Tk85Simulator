@@ -1,15 +1,15 @@
-package deb8085;
+ï»¿package deb8085;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* 8085 CPU ƒƒ‚ƒŠ—ÌˆæƒNƒ‰ƒX */
+/* 8085 CPU ãƒ¡ãƒ¢ãƒªé ˜åŸŸã‚¯ãƒ©ã‚¹ */
 public class Mem8085 {
 	final int MEMORYSIZE = 65536;
 
 	short[] area = new short[MEMORYSIZE];
 	boolean[] readonly = new boolean[MEMORYSIZE];
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public Mem8085() {
 		for (int i = 0; i < MEMORYSIZE; i++) {
 			area[i] = 0;
@@ -17,7 +17,7 @@ public class Mem8085 {
 		}
 	}
 
-	// ’l‚ğƒZƒbƒg
+	// å€¤ã‚’ã‚»ãƒƒãƒˆ
 	public void setValue(int addr, int value) {
 		if (outOfAddressRange(addr)) {
 			return;
@@ -29,7 +29,7 @@ public class Mem8085 {
 		area[addr] = (short) (value & 0xFF);
 	}
 
-	// ’l‚ğ“Ç‚İo‚·
+	// å€¤ã‚’èª­ã¿å‡ºã™
 	public short getValue(int addr) {
 		if (outOfAddressRange(addr)) {
 			return 0xaa;// Error
@@ -38,7 +38,7 @@ public class Mem8085 {
 		return area[addr];
 	}
 
-	// ƒŠ[ƒhƒIƒ“ƒŠ[‚©‚Ç‚¤‚©‚ğƒZƒbƒg
+	// ãƒªãƒ¼ãƒ‰ã‚ªãƒ³ãƒªãƒ¼ã‹ã©ã†ã‹ã‚’ã‚»ãƒƒãƒˆ
 	public void setReadOnly(int addr, boolean readonly) {
 		if (outOfAddressRange(addr)) {
 			return;

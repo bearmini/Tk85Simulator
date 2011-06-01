@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -10,23 +10,23 @@ public class LED7Seg extends Canvas {
 	 */
 	private static final long serialVersionUID = 584293909941667985L;
 
-	// ƒZƒOƒƒ“ƒgƒf[ƒ^
+	// ã‚»ã‚°ãƒ¡ãƒ³ãƒˆãƒ‡ãƒ¼ã‚¿
 	public short segdata = 15;
 
-	// ƒZƒOƒƒ“ƒgÀ•W
+	// ã‚»ã‚°ãƒ¡ãƒ³ãƒˆåº§æ¨™
 	// a b c d e f g h
 	int x[] = { 8, 24, 24, 8, 5, 5, 8, 27 };
 	int y[] = { 5, 8, 25, 40, 25, 8, 22, 43 };
 	int w[] = { 16, 3, 3, 16, 3, 3, 16, 4 };
 	int h[] = { 3, 14, 15, 3, 15, 14, 3, 4 };
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public LED7Seg() {
 		setBackground(Color.red.darker().darker().darker());
 		setSize(32, 48);
 	}
 
-	// •`‰æ
+	// æç”»
 	public void paint(Graphics g) {
 		for (int i = 0; i < 8; i++) {
 			if (util.bitOn(segdata, i))

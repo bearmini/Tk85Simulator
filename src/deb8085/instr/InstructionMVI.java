@@ -1,9 +1,9 @@
-package deb8085.instr;
+ï»¿package deb8085.instr;
 
 import deb8085.*;
 
 //***************************************************************************************************
-/* MVI –½—ß */
+/* MVI å‘½ä»¤ */
 public class InstructionMVI extends Instruction8085 {
 	public InstructionMVI(CPU8085 cpu, byte p1, String p2, byte p3) {
 		super(cpu, p1, p2, p3);
@@ -24,7 +24,7 @@ public class InstructionMVI extends Instruction8085 {
 	public void encode(String operand1, String operand2)
 			throws OnEncodeException {
 		if (operand2 == null)
-			throw new OnEncodeException("•s³‚ÈƒIƒyƒ‰ƒ“ƒhi‚Q‚Â‚ßj");
+			throw new OnEncodeException("ä¸æ­£ãªã‚ªãƒšãƒ©ãƒ³ãƒ‰ï¼ˆï¼’ã¤ã‚ï¼‰");
 		setB2((short) util.unhex(operand2));
 	}
 

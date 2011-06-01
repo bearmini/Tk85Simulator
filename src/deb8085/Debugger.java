@@ -1,1262 +1,1275 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.awt.FileDialog;
 import java.awt.Frame;
 import java.awt.TextArea;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.StringTokenizer;
-import deb8085.io.*;
-import deb8085.instr.*;
+
+import deb8085.instr.Instruction8085;
+import deb8085.io.KeyboardInputStream;
+import deb8085.io.MouseKiller;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* ƒfƒoƒbƒKƒNƒ‰ƒX */
+/* ã‚¹fã‚¹oã‚¹bã‚¹Kã‚¹Nã‚¹ã‚¹ã‚¹X */
 public class Debugger extends Thread {
-	DebuggerParent parent;
-
-	private boolean shouldExit = false;
-
-	Frame frame;
-	TextArea output;
-
-	CPU8085 cpu = null; // CPU
-	Mem8085 mem = null; // ƒƒ‚ƒŠ
-
-	int codeAddr = 0; // ƒR[ƒh—Ìˆæ‚ÌŠJnƒAƒhƒŒƒX
-	int codeSize = 0; // ƒR[ƒh—Ìˆæ‚ÌƒTƒCƒY
-
-	int workAddr = 0; // ì‹Æ—Ìˆæ‚ÌŠJnƒAƒhƒŒƒX
-	int workSize = 0; // ì‹Æ—Ìˆæ‚ÌƒTƒCƒY
-
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹
-	public PublicLabelList publicLabels;
-
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg
-	public BreakPointList breakPoints;
-
-	public KeyboardInputStream input;
-	public MouseKiller mouseKiller;
-
-	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	public Debugger(DebuggerParent parent, Frame frame, TextArea output) {
-		this.parent = parent;
-		this.frame = frame;
-		this.output = output;
-
-		publicLabels = new PublicLabelList();
-		breakPoints = new BreakPointList();
-
-		// CPUEƒƒ‚ƒŠ—Ìˆæ‚ğì¬
-		mem = new Mem8085();
-		cpu = new CPU8085(mem, publicLabels, breakPoints);
-
-		// ƒRƒ“ƒ\[ƒ‹‚©‚ç“ü—Í‚ğ‰Â”\‚É‚·‚é•ƒRƒ“ƒ\[ƒ‹‚É‘Î‚·‚éƒ}ƒEƒX‘€ì‚ğ–³Œø‚É‚·‚é
-		input = new KeyboardInputStream(output);
-		mouseKiller = new MouseKiller(output);
-
-		output.requestFocus();
-	}
-
-	public void requestStop() {
-		this.shouldExit = true;
-	}
-
-	// ***************************************************************************************************
-	// ƒfƒoƒbƒO‚·‚é
-	public void run() {
-		println("");
-
-		do {
-			// –½—ß‚ğ“ü—Í‚µAÀs
-			dispatch(getCommand());
-		} while (!shouldExit);
-
-	}
-
-	// ***************************************************************************************************
-	// ƒfƒoƒbƒOƒRƒ}ƒ“ƒh‚ÌƒfƒBƒXƒpƒbƒ`
-	public void dispatch(String command) {
-		char kind = '\0';
-		String param = "";
-
-		// ƒRƒ}ƒ“ƒh‚Ìí—Ş(æ“ª‚Ìˆê•¶š‚ÅAA`Z)‚ÆA‚»‚Ìƒpƒ‰ƒ[ƒ^‚É•ª‚¯‚é
-		try {
-			kind = command.charAt(0);
-			param = command.substring(1);
-		} catch (StringIndexOutOfBoundsException e) {
-		}
-
-		// –½—ß‚Ìí—Ş‚É‚æ‚Á‚Ä“®ì‚ğ•ª—£
-		switch (kind) {
-		// ƒAƒZƒ“ƒuƒ‹
-		case 'A':
-		case 'a': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr;
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			comAssemble(startAddr);
-
-			break;
-		}
-
-			// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚Ìİ’è¥‰ğœ¥î•ñ•\¦
-		case 'B':
-		case 'b': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int addr;
-			int count;
-
-			int paramCount = st.countTokens();
-
-			// ƒpƒ‰ƒ[ƒ^‚ª‰½‚à‚È‚©‚Á‚½‚ç î•ñ•\¦
-			if (paramCount == 0) {
-				comDisplayBreakPointInfo();
-				break;
-			}
-
-			// ƒpƒ‰ƒ[ƒ^‚ªˆê‚Â‚¾‚¯‚È‚ç ‰ğœ
-			else if (paramCount == 1) {
-				addr = util.unhex(st.nextToken());
-				comResetBreakPoint(addr);
-			}
-
-			// ƒpƒ‰ƒ[ƒ^‚ª“ñ‚Â‚È‚ç İ’è
-			else if (paramCount == 2) {
-				// ƒAƒhƒŒƒX‚Æƒ‰ƒxƒ‹–¼‚ğæ“¾
-				addr = util.unhex(st.nextToken());
-				count = util.unhex(st.nextToken());
-				comSetBreakPoint(addr, count);
-			}
-
-			else {
-				println("ƒpƒ‰ƒ[ƒ^‚ª‘½‚·‚¬‚Ü‚·.");
-				println("");
-			}
-
-			break;
-		}
-
-			//
-		case 'C':
-		case 'c':
-			break;
-
-		// ƒƒ‚ƒŠ—Ìˆæ‚Ì•\¦
-		case 'D':
-		case 'd': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr + 127;
-
-			comDumpMemoryArea(startAddr, endAddr);
-			break;
-		}
-
-			// ƒƒ‚ƒŠ—Ìˆæ‚Ì•ÒW
-		case 'E':
-		case 'e': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr;
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			comEditMemoryArea(startAddr);
-			break;
-		}
-
-			// ƒƒ‚ƒŠ—Ìˆæ‚ÌƒtƒBƒ‹
-		case 'F':
-		case 'f': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-			short value;
-
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr + 127;
-
-			// ƒtƒBƒ‹‚·‚é’l‚ğæ“¾
-			if (st.hasMoreTokens())
-				value = (short) util.unhex(st.nextToken());
-			else
-				value = 0;
-
-			comFillMemoryArea(startAddr, endAddr, value);
-			break;
-		}
-
-			// ƒvƒƒOƒ‰ƒ€‚ÌÀs
-		case 'G':
-		case 'g': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = 0xFFFF;
-
-			// Às
-			comRunProgram(startAddr, endAddr);
-
-			break;
-		}
-
-			// ƒwƒ‹ƒv‚ğ•\¦
-		case 'H':
-		case 'h':
-		case '?': {
-			break;
-		}
-
-			// Š„‚è‚İ‚ÌƒVƒ~ƒ…ƒŒ[ƒg
-		case 'I':
-		case 'i': {
-			break;
-		}
-
-			// ƒRƒ}ƒ“ƒhƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ
-		case 'J':
-		case 'j': {
-			break;
-		}
-
-			//
-		case 'K':
-		case 'k': {
-			break;
-		}
-
-			// MIC ƒtƒ@ƒCƒ‹‚ğƒ[ƒh
-		case 'L':
-		case 'l': {
-			// L ƒRƒ}ƒ“ƒh‚ÌƒIƒyƒ‰ƒ“ƒh‚Í ƒ[ƒh‚·‚éƒtƒ@ƒCƒ‹–¼
-			String filename = param;
-
-			// ƒtƒ@ƒCƒ‹–¼‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Î
-			if (filename.trim().equals("")) {
-				// ƒ_ƒCƒAƒƒO‚ğŠJ‚¢‚Äƒtƒ@ƒCƒ‹–¼‚ğ‹‚ß‚é
-				filename = getFilename();
-				// ƒ_ƒCƒAƒƒO‚ÅƒLƒƒƒ“ƒZƒ‹‚³‚ê‚½‚ç
-				if (filename == null)
-					break;
-			}
-
-			try {
-				// .MIC ƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
-				comLoadMicFile(filename);
-
-				// ƒvƒƒOƒ‰ƒ€ƒJƒEƒ“ƒ^‚ğƒZƒbƒg
-				cpu.reg.setReg(Reg8085.PC, codeAddr);
-			} catch (IOException e) {
-				println("ƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s‚µ‚Ü‚µ‚½B");
-			}
-			break;
-		}
-
-			// ƒƒ‚ƒŠ—Ìˆæ‚ÌˆÚ“®
-		case 'M':
-		case 'm': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr, destAddr;
-
-			// ƒRƒs[ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr + 127;
-
-			// ƒRƒs[æƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				destAddr = util.unhex(st.nextToken());
-			else
-				destAddr = endAddr + 1;
-
-			comMoveMemoryArea(startAddr, endAddr, destAddr);
-			break;
-		}
-
-			// ƒ‰ƒxƒ‹–¼‚Ìİ’èE‰ğœEî•ñ•\¦
-		case 'N':
-		case 'n': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			String labelName;
-			int addr;
-
-			int paramCount = st.countTokens();
-
-			// ƒpƒ‰ƒ[ƒ^‚ª‰½‚à‚È‚©‚Á‚½‚ç î•ñ•\¦
-			if (paramCount == 0) {
-				comDisplayPublicLabelInfo();
-				break;
-			}
-
-			// ƒpƒ‰ƒ[ƒ^‚ªˆê‚Â‚¾‚¯‚È‚ç ‰ğœ
-			else if (paramCount == 1) {
-				labelName = st.nextToken();
-				comResetPublicLabel(labelName);
-			}
-
-			// ƒpƒ‰ƒ[ƒ^‚ª“ñ‚Â‚È‚ç İ’è
-			else if (paramCount == 2) {
-				// ƒAƒhƒŒƒX‚Æƒ‰ƒxƒ‹–¼‚ğæ“¾
-				addr = util.unhex(st.nextToken());
-				labelName = st.nextToken();
-				comSetPublicLabel(labelName, addr);
-			}
-
-			else {
-				println("ƒpƒ‰ƒ[ƒ^‚ª‘½‚·‚¬‚Ü‚·.");
-				println("");
-			}
-
-		}
-
-			//
-		case 'O':
-		case 'o': {
-			break;
-		}
-
-			// ƒƒ‚ƒŠ—Ìˆæ‚ÌƒvƒƒeƒNƒg İ’è¥‰ğœEî•ñ•\¦
-		case 'P':
-		case 'p': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-			boolean resetProtect = false;
-
-			// ƒvƒƒeƒNƒgŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr; // ‚PƒoƒCƒg‚¾‚¯
-
-			// İ’è‚©‰ğœ‚©‚ğæ“¾
-			if (st.hasMoreTokens()) {
-				String str = st.nextToken();
-				resetProtect = (str.equals("R") || str.equals("r"));
-			}
-
-			comProtectMemoryArea(startAddr, endAddr, resetProtect);
-			break;
-		}
-
-			// ƒfƒoƒbƒK‚ÌI—¹
-		case 'Q':
-		case 'q': {
-			parent.onEndDebug();
-			shouldExit = true;
-			break;
-		}
-
-			// ƒŒƒWƒXƒ^‚Ì•\¦A•ÒW
-		case 'R':
-		case 'r': {
-			if (param.equals("X") || param.equals("x"))
-				comEditRegister();
-			else
-				comDumpRegister();
-			break;
-		}
-
-			//
-		case 'S':
-		case 's': {
-			break;
-		}
-
-			// ƒvƒƒOƒ‰ƒ€‚ÌƒgƒŒ[ƒX
-		case 'T':
-		case 't': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-			boolean onestep;
-
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = 0xFFFF;
-
-			// 1ƒXƒeƒbƒvƒuƒŒ[ƒN‚©H
-			if (st.hasMoreTokens())
-				onestep = true;
-			else
-				onestep = false;
-
-			comTraceProgram(startAddr, endAddr, onestep);
-			break;
-		}
-
-			// ‹tƒAƒZƒ“ƒuƒ‹
-		case 'U':
-		case 'u': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr + 127;
-
-			comDisassemble(startAddr, endAddr);
-			break;
-		}
-
-			//
-		case 'V':
-		case 'v': {
-			break;
-		}
-
-			// ƒƒ‚ƒŠ—Ìˆæ‚Ì‘‚«o‚µ
-		case 'W':
-		case 'w': {
-			StringTokenizer st = new StringTokenizer(param, ",");
-			int startAddr, endAddr;
-
-			// ŠJnƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				startAddr = util.unhex(st.nextToken());
-			else
-				startAddr = cpu.reg.getReg(Reg8085.PC);
-
-			// I—¹ƒAƒhƒŒƒX‚ğæ“¾
-			if (st.hasMoreTokens())
-				endAddr = util.unhex(st.nextToken());
-			else
-				endAddr = startAddr + 127;
-
-			// ƒZ[ƒu‚·‚éƒtƒ@ƒCƒ‹–¼‚ğ“¾‚é
-			String filename = null;
-			if (st.hasMoreTokens())
-				filename = st.nextToken();
-
-			// ƒtƒ@ƒCƒ‹–¼‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Î
-			if (filename == null || filename.trim().equals("")) {
-				// ƒ_ƒCƒAƒƒO‚ğŠJ‚¢‚Äƒtƒ@ƒCƒ‹–¼‚ğ‹‚ß‚é
-				filename = getFilename();
-				// ƒ_ƒCƒAƒƒO‚ÅƒLƒƒƒ“ƒZƒ‹‚³‚ê‚½‚ç
-				if (filename == null)
-					break;
-				// “¯‚¶–¼‘O‚Ìƒtƒ@ƒCƒ‹‚ª‚·‚Å‚É‘¶İ‚µ‚Ä‚¢‚½‚ç
-
-			}
-
-			try {
-				comWriteToFile(startAddr, endAddr, filename);
-			} catch (IOException e) {
-				println("ƒtƒ@ƒCƒ‹‚Ì‘‚«‚İ‚É¸”s‚µ‚Ü‚µ‚½.");
-			}
-
-			break;
-		}
-
-			//
-		case 'X':
-		case 'x': {
-			break;
-		}
-
-			// ƒgƒŒ[ƒX‚ÌƒXƒeƒbƒvƒI[ƒo[—Ìˆæ‚ğ İ’è¥‰ğœ¥î•ñ•\¦
-		case 'Y':
-		case 'y': {
-			break;
-		}
-
-			// î•ñ•\¦
-		case 'Z':
-		case 'z': {
-			comDisplayDebugInfo();
-			break;
-		}
-
-		}
-
-	}
-
-	// ***************************************************************************************************
-	// ***************************************************************************************************
-	// •\¦—p ”Ä—pƒƒ\ƒbƒhŒQ
-
-	// ƒAƒhƒŒƒX‚ğ•\¦
-	void printAddr(int addr) {
-		print(util.hex4(addr));
-	}
-
-	// s‚Ìæ“ª‚Æ‚µ‚ÄƒAƒhƒŒƒX‚ğ•\¦
-	void printAddrAsLineHeader(int addr) {
-		println("");
-		printAddr(addr);
-		print(" ");
-	}
-
-	// –½—ßƒR[ƒh‚ğ•¶š—ñ‚É‚µ‚Ä•Ô‚·
-	String sprintOpecode(Instruction8085 inst) {
-		StringBuffer sb = new StringBuffer();
-
-		// –½—ßƒR[ƒh‚Ì1ƒoƒCƒg‚ß‚ğ•\¦
-		sb.append(util.hex2(inst.getOpecode()) + " ");
-
-		// –½—ßƒTƒCƒY‚É‰‚¶‚Ä 2ƒoƒCƒg‚ßA3ƒoƒCƒg‚ß‚ğ•\¦
-		if (inst.getSize() == 1)
-			sb.append(util.space(8));
-		else if (inst.getSize() == 2)
-			sb.append(util.hex2(inst.getB2()) + util.space(6));
-		else if (inst.getSize() == 3)
-			sb.append(util.hex2(inst.getB2()) + " " + util.hex2(inst.getB3())
-					+ util.space(3));
-
-		return sb.toString();
-	}
-
-	// ƒŒƒWƒXƒ^•\¦‚Ìƒwƒbƒ_
-	void printRegistersHeader() {
-		println(" A  B  C  D  E  H  L  SP   PC  Z C S P AC");
-	}
-
-	// ƒŒƒWƒXƒ^‚Ì’l‚ğ•\¦
-	void printRegisters() {
-		print(util.hex2(cpu.reg.getReg(Reg8085.A)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.B)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.C)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.D)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.E)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.H)) + " "
-				+ util.hex2(cpu.reg.getReg(Reg8085.L)) + " "
-				+ util.hex4(cpu.reg.getReg(Reg8085.SP)) + " "
-				+ util.hex4(cpu.reg.getReg(Reg8085.PC)) + " "
-				+ (cpu.reg.getFlag(Reg8085.Zf) ? 1 : 0) + " "
-				+ (cpu.reg.getFlag(Reg8085.Cf) ? 1 : 0) + " "
-				+ (cpu.reg.getFlag(Reg8085.Sf) ? 1 : 0) + " "
-				+ (cpu.reg.getFlag(Reg8085.Pf) ? 1 : 0) + " "
-				+ (cpu.reg.getFlag(Reg8085.ACf) ? 1 : 0));
-	}
-
-	// ƒƒ‚ƒŠ“à—e•\¦‚Ì‚Æ‚«‚Ìƒwƒbƒ_
-	void printMemoryHeader() {
-		println("Addr  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0123456789ABCDEF");
-	}
-
-	// ƒƒ‚ƒŠ“à—e‚ğˆês•\¦ ƒAƒhƒŒƒX{ƒ_ƒ“ƒv{ƒAƒXƒL[
-	void printMemoryAreaOneLine(int startAddr, int endAddr) {
-		StringBuffer sbDump = new StringBuffer();
-		StringBuffer sbHead = new StringBuffer();
-		StringBuffer sbAscii = new StringBuffer();
-
-		// ƒwƒbƒ_‚Æ‚µ‚Ä‚ÌƒAƒhƒŒƒX‚ÆAƒƒ‚ƒŠ‚Ì“à—e‚É‚½‚Ç‚è’…‚­‚Ü‚Å‚Ì‹ó‚Á‚Û‚Ì•”•ª
-		sbHead.append(util.hex4(startAddr % 0xFFF0) + " ");
-		sbAscii.append('*');
-		for (int addr = startAddr & 0xFFF0; addr < startAddr; addr++)
-			sbDump.append(util.space(3));
-
-		// ƒƒ‚ƒŠƒ_ƒ“ƒv‚ğ•\¦
-		for (int addr = startAddr; addr <= endAddr; addr++) {
-			// ƒƒ‚ƒŠ‚Ì“à—e‚Æ‘Î‰‚·‚éƒAƒXƒL[•¶š‚ğ•\¦
-			char c = (char) mem.getValue(addr);
-			sbDump.append(util.hex2(c));
-			sbAscii.append(util.makeValidChar(c));
-			if (addr % 0x10 != 7)
-				sbDump.append(" ");
-			else
-				sbDump.append("-");
-		}
-
-		// 16ƒoƒCƒg‚É’B‚µ‚Ä‚¢‚È‚¢•ª‚ğ•â‘«
-		for (int addr = endAddr + 1; addr < ((endAddr + 0x10) & 0xFFF0); addr++)
-			sbDump.append(util.space(3));
-
-		println("" + sbHead + sbDump + sbAscii);
-	}
-
-	// ƒgƒŒ[ƒXî•ñi–½—ß‚ÌƒAƒhƒŒƒXA–½—ßƒR[ƒhAƒj[ƒ‚ƒjƒbƒNj‚ğ•\¦
-	void printTraceInfo(Instruction8085 inst) {
-		StringBuffer sbAddr = new StringBuffer();
-		StringBuffer sbInst = new StringBuffer();
-
-		// –½—ß‚ÌƒAƒhƒŒƒX
-		sbAddr.append(util.hex4(cpu.reg.getReg(Reg8085.PC)));
-
-		// –½—ßƒR[ƒhAƒj[ƒ‚ƒjƒbƒN
-		sbInst.append(sprintOpecode(inst) + inst.toString());
-		int len = sbAddr.length() + sbInst.length();
-		if (len < 23)
-			sbInst.append("\t\t");
-		else
-			sbInst.append("\t");
-
-		print("" + sbAddr + " " + sbInst);
-	}
-
-	// ***************************************************************************************************
-	// ***************************************************************************************************
-	// ƒRƒ}ƒ“ƒhˆ—ƒƒ\ƒbƒhŒQ
-
-	// ***************************************************************************************************
-	// A ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ŠÈˆÕƒAƒZƒ“ƒuƒ‰
-	void comAssemble(int startAddr) {
-		int addr = startAddr;
-		String s;
-		int com_bytes;
-
-		SimpleAssembler asm = new SimpleAssembler(cpu);
-
-		do {
-			// ƒvƒƒ“ƒvƒg addr:
-			print(util.hex4(addr) + ": ");
-			s = readln();
-
-			if (s.trim().equals(""))
-				break;
-
-			// ˆêsƒAƒZƒ“ƒuƒ‹ •ÏŠ·‚³‚ê‚½ƒoƒCƒg”‚ğ“¾‚é
-			try {
-				com_bytes = asm.assemble(addr, s);
-			} catch (OnEncodeException e) {
-				println(e.message);
-				continue;
-			}
-
-			// ƒAƒhƒŒƒX‚ği‚ß‚é
-			addr += com_bytes;
-
-		} while (true);
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// B ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒgî•ñ‚ğ•\¦
-	void comDisplayBreakPointInfo() {
-		if (breakPoints.size() == 0) {
-			println("No break points.");
-			println("");
-			return;
-		}
-
-		println("");
-		println("Break points        count: " + breakPoints.size());
-		println(" addr\tcount\tlabel");
-		for (int num = 0; num < breakPoints.size(); num++) {
-			BreakPoint8085 b = breakPoints.getBreakPointAt(num);
-			print("" + util.hex4(b.addr));
-			print("\t   ");
-			print("" + b.count);
-			println("");
-		}
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚Ìİ’èE‰ğœ
-	void comSetBreakPoint(int addr, int count) {
-		try {
-			breakPoints.addBreakPoint(addr, count);
-		} catch (BreakPointListException e) {
-			println(e.message);
-		}
-
-		println("");
-	}
-
-	void comResetBreakPoint(int addr) {
-		try {
-			breakPoints.delBreakPoint(addr);
-			println("Break point at address " + util.hex4(addr)
-					+ " is deleted. OK.");
-		} catch (BreakPointListException e) {
-			println(e.message);
-		}
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// D ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ“à—e‚Ì•\¦
-	void comDumpMemoryArea(int startAddr, int endAddr) {
-		// ‘S‘Ì‚Ìƒwƒbƒ_
-		printMemoryHeader();
-
-		// ˆês‚Åû‚Ü‚éê‡
-		if ((startAddr & 0xFFF0) == (endAddr & 0xFFF0))
-			printMemoryAreaOneLine(startAddr, endAddr);
-
-		// “ñsˆÈã‚É‚í‚½‚éê‡
-		else {
-			int addr = startAddr;
-
-			// Å‰‚Ìs
-			printMemoryAreaOneLine(startAddr, (startAddr & 0xFFF0) + 0x0f);
-
-			// ’†ŠÔ‚ÌsA‚È‚¢ê‡‚à‚ ‚éB
-			for (addr = (startAddr + 0x10) & 0xFFF0; addr <= (endAddr - 0x10); addr += 0x10)
-				printMemoryAreaOneLine(addr, addr + 0x0f);
-
-			// ÅŒã‚Ìs
-			if ((addr & 0xFFF0) == (endAddr & 0xFFF0))
-				printMemoryAreaOneLine(addr, endAddr);
-		}
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// E ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ—Ìˆæ‚Ì•ÒW
-	void comEditMemoryArea(int startAddr) {
-		// ‘S‘Ì‚Ìƒwƒbƒ_
-		printMemoryHeader();
-
-		int addr = startAddr;
-		int blankaddr = startAddr & 0x0F;
-
-		// •\¦•“ü—Íƒ‹[ƒv
-		while (true) {
-			// ƒƒ‚ƒŠ“à—e‚ğ•\¦
-			printMemoryAreaOneLine(addr, (addr & 0xFFF0) + 0x0F);
-
-			// “ü—Íƒwƒbƒ_
-			print("     " + util.space(blankaddr * 3));
-
-			// “ü—Í
-			String s = readln();
-
-			// “ü—Í‚ª‚È‚¯‚ê‚Î•ÒW‚ğI—¹
-			if (s.trim().equals(""))
-				break;
-
-			// “ü—Í‚ğ‰ğÍ
-			try {
-				for (int i = 0; i < 0x10; i++)
-					mem.setValue(addr + i, !(s.substring(3 * i, 3 * i + 2)
-							.equals("  ")) ? util.unhex(s.substring(3 * i,
-							3 * i + 2)) : mem.getValue(addr + i));
-			} catch (StringIndexOutOfBoundsException e) {
-			}
-
-			// Ÿ‚Éi‚Ş
-			addr = (addr & 0xFFF0) + 0x10;
-			blankaddr = 0;
-		}
-
-	}
-
-	// ***************************************************************************************************
-	// F ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ—Ìˆæ‚ÌƒtƒBƒ‹
-	void comFillMemoryArea(int startAddr, int endAddr, short value) {
-		for (int addr = startAddr; addr <= endAddr; addr++)
-			mem.setValue(addr, value);
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// G ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// Às
-	void comRunProgram(int startAddr, int endAddr) {
-		cpu.reg.setReg(Reg8085.PC, startAddr);
-		cpu.restart();
-
-		while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
-			try {
-				cpu.execute(cpu.decode(cpu.fetch()));
-			} catch (OnBreakPointException e) {
-				println(e.message);
-			}
-
-			if (cpu.isHalted())
-				break;
-		}
-	}
-
-	// ***************************************************************************************************
-	// L ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// MICƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚Ş
-	public void comLoadMicFile(String filename) throws IOException {
-		// ƒtƒ@ƒCƒ‹‚ğƒI[ƒvƒ“
-		DataInputStream d = new DataInputStream(new BufferedInputStream(
-				new FileInputStream(filename)));
-
-		// ƒtƒ@ƒCƒ‹ ID ‚Ìƒ`ƒFƒbƒN
-		byte id1 = d.readByte();
-		byte id2 = d.readByte();
-		if (!(id1 == 80/* 'P' */&& id2 == 72/* 'H' */)) {
-			throw new IOException();
-		}
-
-		// ƒR[ƒh—ÌˆæEì‹Æ—Ìˆæƒf[ƒ^‚Ìæ“¾
-		codeAddr = d.readUnsignedShort();
-		codeSize = d.readUnsignedShort();
-		workSize = d.readUnsignedShort();
-		workAddr = d.readUnsignedShort();
-
-		codeAddr = util.swapEndian(codeAddr);
-		codeSize = util.swapEndian(codeSize);
-		workAddr = util.swapEndian(workAddr);
-		workSize = util.swapEndian(workSize);
-
-		// ƒR[ƒh‚ğæ“¾‚µA¢ƒƒ‚ƒŠ£ ‚ÉŠi”[
-		for (int addr = codeAddr; addr < codeAddr + codeSize; addr++)
-			mem.setValue(addr, d.readUnsignedByte());
-
-		// ƒtƒ@ƒCƒ‹ ID ‚Ìƒ`ƒFƒbƒN
-		byte id3 = d.readByte();
-		byte id4 = d.readByte();
-		if (!(id3 == 80/* 'P' */&& id4 == 66/* 'B' */)) {
-			throw new IOException();
-		}
-
-		// PUBLIC ƒ‰ƒxƒ‹‚Ìƒf[ƒ^‚ğæ“¾
-		int numOfPublicLabels = d.readUnsignedShort();
-		numOfPublicLabels = util.swapEndian(numOfPublicLabels);
-
-		byte[] buf = new byte[8];
-		String publicLabelName;
-		int publicLabelAddr;
-
-		for (int num = 0; num < numOfPublicLabels; num++) {
-			d.read(buf);
-			publicLabelName = new String(buf);
-			publicLabelAddr = d.readUnsignedShort();
-			publicLabelAddr = util.swapEndian(publicLabelAddr);
-			publicLabels.addElement(new PublicLabel8085(publicLabelName,
-					publicLabelAddr));
-		}
-
-		d.close();
-		// î•ñ‚ğ•\¦
-		comDisplayDebugInfo();
-		comDisplayPublicLabelInfo();
-	}
-
-	// ***************************************************************************************************
-	// M ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ—Ìˆæ‚ÌˆÚ“®
-	void comMoveMemoryArea(int startAddr, int endAddr, int destAddr) {
-		for (int addr = 0; addr <= endAddr - startAddr; addr++)
-			mem.setValue(destAddr + addr, mem.getValue(startAddr + addr));
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// N ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹î•ñ‚ğ•\¦
-	void comDisplayPublicLabelInfo() {
-		if (publicLabels.size() == 0) {
-			println("No public labels.");
-			println("");
-			return;
-		}
-
-		println("");
-		println("Public labels        count: " + publicLabels.size());
-		println(" name      addr");
-		for (int num = 0; num < publicLabels.size(); num++) {
-			PublicLabel8085 p = publicLabels.getPublicLabelAt(num);
-			print("" + p.name);
-			print("\t   ");
-			print("" + util.hex4(p.addr));
-			println("");
-		}
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// ƒpƒuƒŠƒbƒNƒ‰ƒxƒ‹‚Ìİ’èE‰ğœ
-	void comSetPublicLabel(String labelName, int addr) {
-		try {
-			publicLabels.addPublicLabel(labelName, addr);
-		} catch (PublicLabelListException e) {
-			println(e.message);
-		}
-
-		println("");
-	}
-
-	void comResetPublicLabel(String labelName) {
-		try {
-			publicLabels.delPublicLabel(labelName);
-			println("Public label " + labelName + " is deleted. OK.");
-		} catch (PublicLabelListException e) {
-			println(e.message);
-		}
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// P ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ—Ìˆæ‚ÌƒvƒƒeƒNƒg‚Ìİ’èE‰ğœ
-	void comProtectMemoryArea(int startAddr, int endAddr, boolean resetProtect) {
-		for (int addr = startAddr; addr <= endAddr; addr++)
-			mem.setReadOnly(addr, !resetProtect);
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// R ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒŒƒWƒXƒ^‚Ì•Û‚µ‚Ä‚¢‚é’l‚ğ•\¦
-	void comDumpRegister() {
-		printRegistersHeader();
-		printRegisters();
-		println("");
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// ƒŒƒWƒXƒ^‚Ì•Û‚µ‚Ä‚¢‚é’l‚ğ•ÒW
-	void comEditRegister() {
-		// ƒŒƒWƒXƒ^’l‚ğ•\¦
-		printRegistersHeader();
-		printRegisters();
-		println("");
-
-		// ˆês“Ç‚İ‚ñ‚ÅA•ªÍ
-		String s = readln();
-
-		try {
-			cpu.reg.setReg(Reg8085.A,
-					!(s.substring(0, 2).equals("  ")) ? (short) util.unhex(s
-							.substring(0, 2)) : cpu.reg.getReg(Reg8085.A));
-			cpu.reg.setReg(Reg8085.B,
-					!(s.substring(3, 5).equals("  ")) ? (short) util.unhex(s
-							.substring(3, 5)) : cpu.reg.getReg(Reg8085.B));
-			cpu.reg.setReg(Reg8085.C,
-					!(s.substring(6, 8).equals("  ")) ? (short) util.unhex(s
-							.substring(6, 8)) : cpu.reg.getReg(Reg8085.C));
-			cpu.reg.setReg(Reg8085.D,
-					!(s.substring(9, 11).equals("  ")) ? (short) util.unhex(s
-							.substring(9, 11)) : cpu.reg.getReg(Reg8085.D));
-			cpu.reg.setReg(Reg8085.E,
-					!(s.substring(12, 14).equals("  ")) ? (short) util.unhex(s
-							.substring(12, 14)) : cpu.reg.getReg(Reg8085.E));
-			cpu.reg.setReg(Reg8085.H,
-					!(s.substring(15, 17).equals("  ")) ? (short) util.unhex(s
-							.substring(15, 17)) : cpu.reg.getReg(Reg8085.H));
-			cpu.reg.setReg(Reg8085.L,
-					!(s.substring(18, 20).equals("  ")) ? (short) util.unhex(s
-							.substring(18, 20)) : cpu.reg.getReg(Reg8085.L));
-			cpu.reg.setReg(Reg8085.SP,
-					!(s.substring(21, 25).equals("    ")) ? util.unhex(s
-							.substring(21, 25)) : cpu.reg.getReg(Reg8085.SP));
-			cpu.reg.setReg(Reg8085.PC,
-					!(s.substring(26, 30).equals("    ")) ? util.unhex(s
-							.substring(26, 30)) : cpu.reg.getReg(Reg8085.PC));
-			cpu.reg.setFlag(Reg8085.Zf, !(s.substring(31, 32).equals(" ")) ? s
-					.substring(31, 32).equals("1") : cpu.reg
-					.getFlag(Reg8085.Zf));
-			cpu.reg.setFlag(Reg8085.Cf, !(s.substring(33, 34).equals(" ")) ? s
-					.substring(33, 34).equals("1") : cpu.reg
-					.getFlag(Reg8085.Cf));
-			cpu.reg.setFlag(Reg8085.Sf, !(s.substring(35, 36).equals(" ")) ? s
-					.substring(35, 36).equals("1") : cpu.reg
-					.getFlag(Reg8085.Sf));
-			cpu.reg.setFlag(Reg8085.Pf, !(s.substring(37, 38).equals(" ")) ? s
-					.substring(37, 38).equals("1") : cpu.reg
-					.getFlag(Reg8085.Pf));
-			cpu.reg.setFlag(Reg8085.ACf, !(s.substring(39, 40).equals(" ")) ? s
-					.substring(39, 40).equals("1") : cpu.reg
-					.getFlag(Reg8085.ACf));
-		} catch (StringIndexOutOfBoundsException e) {
-		}
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// T ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒgƒŒ[ƒX
-	void comTraceProgram(int startAddr, int endAddr, boolean traceOneStep) {
-		String message = null;
-		Instruction8085 inst;
-
-		keyEchoOff();
-		cpu.restart();
-
-		try {
-			cpu.reg.setReg(Reg8085.PC, startAddr);
-
-			// ƒwƒbƒ_‚ğ•\¦
-			println("Addr Code       Mnemonic         A  B  C  D  E  H  L  SP   PC  Z C S P AC");
-
-			// Àsƒ‹[ƒv
-			while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
-				// –½—ß‚ğæ“¾
-				inst = cpu.decode(cpu.fetch());
-
-				// Às‘O‚Ìó‘Ô‚ğ•\¦
-				printTraceInfo(inst);
-
-				// –½—ß‚ÌÀs‘Ò‚¿
-				if (traceOneStep) {
-					int c = read();
-					if (c == 'Q' || c == 'q')
-						break;
-				}
-				// –½—ß‚ğÀs
-				try {
-					cpu.execute(inst);
-				} catch (OnBreakPointException e) {
-					message = e.message;
-				}
-
-				// ÀsŒ‹‰Ê‚ÌƒŒƒWƒXƒ^‚ğ•\¦
-				printRegisters();
-				println("");
-
-				if (message != null)
-					println(message);
-
-				if (cpu.isHalted())
-					break;
-
-			}
-		} finally {
-			keyEchoOn();
-		}
-
-	}
-
-	// ***************************************************************************************************
-	// U ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ‹tƒAƒZƒ“ƒuƒ‹
-	void comDisassemble(int startAddr, int endAddr) {
-
-		int orgPC = cpu.reg.getReg(Reg8085.PC);
-		int newPC;
-		Instruction8085 inst;
-
-		cpu.reg.setReg(Reg8085.PC, startAddr);
-		while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
-			inst = cpu.decode(cpu.fetch());
-
-			// ƒAƒhƒŒƒX‚ğ•\¦‚µA–½—ßƒR[ƒhAƒIƒyƒ‰ƒ“ƒhAƒj[ƒ‚ƒjƒbƒN‚Ì•\¦
-			printTraceInfo(inst);
-			println("");
-
-			// ƒj[ƒ‚ƒjƒbƒN‚ª HLT ‚¾‚Á‚½‚çI—¹
-			if (inst.getMnemonic().equals("HLT"))
-				break;
-
-			// Ÿ‚Ì–½—ß‚Ö
-			newPC = cpu.reg.getReg(Reg8085.PC) + inst.getSize();
-			cpu.reg.setReg(Reg8085.PC, newPC);
-		}
-
-		// PC ’l‚ğŒ³‚É–ß‚·
-		cpu.reg.setReg(Reg8085.PC, orgPC);
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// W ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒƒ‚ƒŠ“à—e‚ğƒtƒ@ƒCƒ‹‚É‘‚«o‚µ
-	void comWriteToFile(int startaddr, int endaddr, String filename)
-			throws IOException {
-		// ƒtƒ@ƒCƒ‹‚ğƒI[ƒvƒ“
-		DataOutputStream d = new DataOutputStream(new BufferedOutputStream(
-				new FileOutputStream(filename)));
-
-		// ƒtƒ@ƒCƒ‹ ID ‚Ì‘‚«‚İ
-		d.writeByte(80/* P */);
-		d.writeByte(72/* H */);
-
-		// ƒR[ƒh—ÌˆæEì‹Æ—Ìˆæƒf[ƒ^‚Ì‘‚«‚İ
-		int temp_codeAddr = startaddr;
-		int temp_codeSize = endaddr - startaddr + 1;
-		int temp_workAddr = workAddr;
-		int temp_workSize = workSize;
-
-		int swaped_codeAddr = util.swapEndian(temp_codeAddr);
-		int swaped_codeSize = util.swapEndian(temp_codeSize);
-		int swaped_workAddr = util.swapEndian(temp_workAddr);
-		int swaped_workSize = util.swapEndian(temp_workSize);
-
-		d.writeShort((short) swaped_codeAddr);
-		d.writeShort((short) swaped_codeSize);
-		d.writeShort((short) swaped_workSize);
-		d.writeShort((short) swaped_workAddr);
-
-		// ƒR[ƒh‚ğæ“¾‚µAƒtƒ@ƒCƒ‹‚ÉŠi”[
-		for (int addr = temp_codeAddr; addr < temp_codeAddr + temp_codeSize; addr++)
-			d.writeByte((byte) mem.getValue(addr));
-
-		// ƒtƒ@ƒCƒ‹ ID ‚Ì‘‚«‚İ
-		d.writeByte(80/* P */);
-		d.writeByte(66/* B */);
-
-		// PUBLIC ƒ‰ƒxƒ‹‚Ìƒf[ƒ^‚ğ‘‚«‚İ
-		d.writeShort(util.swapEndian(publicLabels.size()));
-
-		for (int num = 0; num < publicLabels.size(); num++) {
-			PublicLabel8085 p = publicLabels.getPublicLabelAt(num);
-			for (int i = 0; i < 8; i++)
-				d.writeByte((byte) p.name.charAt(i));
-
-			d.writeShort(util.swapEndian(p.addr));
-		}
-
-		d.close();
-		println("³í‚É‘‚«o‚µ‚Ü‚µ‚½.");
-	}
-
-	// ***************************************************************************************************
-	// Z ƒRƒ}ƒ“ƒh
-	// ***************************************************************************************************
-	// ƒfƒoƒbƒOî•ñ‚ğ•\¦
-	void comDisplayDebugInfo() {
-		println("");
-		if (codeSize > 0)
-			println("code: " + util.hex4(codeAddr) + " - "
-					+ util.hex4(codeAddr + codeSize - 1));
-		else
-			println("code: none.");
-
-		if (workSize > 0)
-			println("work: " + util.hex4(workAddr) + " - "
-					+ util.hex4(workAddr + workSize - 1));
-		else
-			println("work: none.");
-
-		println("");
-	}
-
-	// ***************************************************************************************************
-	// ***************************************************************************************************
-	// ‚»‚Ì‘¼ ‰º“­‚«ƒƒ\ƒbƒhŒQ
-
-	// ***************************************************************************************************
-	// ƒRƒ}ƒ“ƒh‚ğæ“¾
-	public String getCommand() {
-		print(">");
-		return input.readln();
-	}
-
-	// ***************************************************************************************************
-	// ƒtƒ@ƒCƒ‹–¼‚ğ“¾‚é FileDialog ‚ğg‚¤
-	public String getFilename() {
-		FileDialog fd = new FileDialog(frame, "Open MIC File");
-		fd.setVisible(true);
-		if (fd.getDirectory() != null && fd.getFile() != null)
-			return fd.getDirectory() + fd.getFile();
-		else
-			return null;
-	}
-
-	// ***************************************************************************************************
-	// ƒRƒ“ƒ\[ƒ‹‚É•¶š—ñ‚ğ•\¦
-	public void print(String s) {
-		output.append(s);
-	}
-
-	public void println(String s) {
-		output.append(s + "\n");
-	}
-
-	// ***************************************************************************************************
-	// ƒRƒ“ƒ\[ƒ‹‚©‚ç•¶š—ñ‚ğæ“¾
-	public String readln() {
-		return input.readln();
-	}
-
-	// ***************************************************************************************************
-	// ƒRƒ“ƒ\[ƒ‹‚©‚ç‚P•¶š‚ğæ“¾
-	public int read() {
-		return input.read();
-	}
-
-	// ***************************************************************************************************
-	// ƒL[ƒGƒR[–³‚µ
-	public void keyEchoOff() {
-		input.echoOff();
-	}
-
-	// ***************************************************************************************************
-	// ƒL[ƒGƒR[—L‚è
-	public void keyEchoOn() {
-		input.echoOn();
-	}
+    DebuggerParent parent;
+
+    private boolean shouldExit = false;
+
+    Frame frame;
+    TextArea output;
+
+    CPU8085 cpu = null; // CPU
+    Mem8085 mem = null; // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+
+    int codeAddr = 0; // ã‚¹Rã‚¹[ã‚¹hã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•é–‹ã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹X
+    int codeSize = 0; // ã‚¹Rã‚¹[ã‚¹hã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ã‚µã‚¹Cã‚¹Y
+
+    int workAddr = 0; // ã‚¹ã‚¹ãƒ‹é ˜èŒ¨ã‚½ã‚¹ãƒ•é–‹ã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹X
+    int workSize = 0; // ã‚¹ã‚¹ãƒ‹é ˜èŒ¨ã‚½ã‚¹ãƒ•ã‚µã‚¹Cã‚¹Y
+
+    // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹
+    public PublicLabelList publicLabels;
+
+    // ã‚¹uã‚¹ã‚¹ã‚¹[ã‚¹Nã‚¹|ã‚¹Cã‚¹ã‚¹ã‚¹g
+    public BreakPointList breakPoints;
+
+    public KeyboardInputStream input;
+    public MouseKiller mouseKiller;
+
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹ã‚¹ã‚¹Xã‚¹gã‚¹ã‚¹ã‚¹Nã‚¹^
+    public Debugger(DebuggerParent parent, Frame frame, TextArea output) {
+        this.parent = parent;
+        this.frame = frame;
+        this.output = output;
+
+        publicLabels = new PublicLabelList();
+        breakPoints = new BreakPointList();
+
+        // CPUã‚¹Eã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ã‚¹ã‚¹ãƒ£
+        mem = new Mem8085();
+        cpu = new CPU8085(mem, publicLabels, breakPoints);
+
+        // ã‚¹Rã‚¹ã‚¹ã‚¹\ã‚¹[ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ˜ã‚‘ã‚½ã‚¹ã‚¹ãƒ„èƒ½ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹é©•åŒ…ã‚½ã‚¹Rã‚¹ã‚¹ã‚¹\ã‚¹[ã‚¹ã‚¹ã‚¹ãƒå¯¾ã‚‘ã‚½ã‚¹ã‚¹ã‚¹}ã‚¹Eã‚¹Xã‚¹ã‚¹ã‚¹ã‚¹î•ã‚¦é¯‰ã‚½ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹
+        input = new KeyboardInputStream(output);
+        mouseKiller = new MouseKiller(output);
+
+        output.requestFocus();
+    }
+
+    public void requestStop() {
+        this.shouldExit = true;
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹fã‚¹oã‚¹bã‚¹Oã‚¹ã‚¹ã‚¹ã‚¹
+    public void run() {
+        println("");
+
+        do {
+            // ã‚¹ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹ã‚¹ãƒ˜ã‚‘ã‚½ã‚¹ã‚¹Aã‚¹ã‚¹ã‚¹s
+            dispatch(getCommand());
+        } while (!shouldExit);
+
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹fã‚¹oã‚¹bã‚¹Oã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹ãƒ•ãƒ‡ã‚¹Bã‚¹Xã‚¹pã‚¹bã‚¹`
+    public void dispatch(String command) {
+        char kind = '\0';
+        String param = "";
+
+        // ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹ãƒ•è¶£ã‚½ã‚¹ã‚¹(ã‚¹è¬«ã‚§ã‚¹ãƒ•ä¸€æ–‡ã‚¹ã‚¹ã‚¹ãƒŠã€Aã‚¹`Z)ã‚¹ãƒ‹ã€ã‚¹ã‚¹ã‚¹ãƒ•ãƒ‘ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ãƒåŒ…ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        try {
+            kind = command.charAt(0);
+            param = command.substring(1);
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+
+        // ã‚¹ã‚¹ã‚¹ã‚œã®è¶£ã‚½ã‚ºã«ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒˆé›£ã‚½ã‚¹ã‚¹ã‚¹î”ã‚§æš¦ã‚½ã‚¹
+        switch (kind) {
+        // ã‚¹Aã‚¹Zã‚¹ã‚¹ã‚¹uã‚¹ã‚¹
+        case 'A':
+        case 'a': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr;
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            comAssemble(startAddr);
+
+            break;
+        }
+
+            // ã‚¹uã‚¹ã‚¹ã‚¹[ã‚¹Nã‚¹|ã‚¹Cã‚¹ã‚¹ã‚¹gã‚¹ãƒ•è¨­å®šãƒ»ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'B':
+        case 'b': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int addr;
+            int count;
+
+            int paramCount = st.countTokens();
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+            if (paramCount == 0) {
+                comDisplayBreakPointInfo();
+                break;
+            }
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ ã‚¹ã‚¹ã‚¹ã‚¹
+            else if (paramCount == 1) {
+                addr = util.unhex(st.nextToken());
+                comResetBreakPoint(addr);
+            }
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ãªã‚‘ã‚½ã‚¹ ã‚¹ãƒ³æŠµã‚½ã‚¹
+            else if (paramCount == 2) {
+                // ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒ‹ã‚½ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹è¬«ã‚»
+                addr = util.unhex(st.nextToken());
+                count = util.unhex(st.nextToken());
+                comSetBreakPoint(addr, count);
+            }
+
+            else {
+                println("ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹.");
+                println("");
+            }
+
+            break;
+        }
+
+            //
+        case 'C':
+        case 'c':
+            break;
+
+        // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•è¡¨ã‚¹ã‚¹
+        case 'D':
+        case 'd': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr + 127;
+
+            comDumpMemoryArea(startAddr, endAddr);
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ç·¨é›†
+        case 'E':
+        case 'e': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr;
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            comEditMemoryArea(startAddr);
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ãƒ•ã‚¹Bã‚¹ã‚¹
+        case 'F':
+        case 'f': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+            short value;
+
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr + 127;
+
+            // ã‚¹tã‚¹Bã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹lã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                value = (short) util.unhex(st.nextToken());
+            else
+                value = 0;
+
+            comFillMemoryArea(startAddr, endAddr, value);
+            break;
+        }
+
+            // ã‚¹vã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•è¶£ã‚½ã‚¹ã‚¹s
+        case 'G':
+        case 'g': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = 0xFFFF;
+
+            // ã‚¹ã‚¹ã‚¹s
+            comRunProgram(startAddr, endAddr);
+
+            break;
+        }
+
+            // ã‚¹wã‚¹ã‚¹ã‚¹vã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'H':
+        case 'h':
+        case '?': {
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹é—•æ©¸ã‚½ã‚¹ãƒ³ã®ã‚·ã‚¹~ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹g
+        case 'I':
+        case 'i': {
+            break;
+        }
+
+            // ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ãƒ•èª­ã¿æ¾ã‚½ã‚¹ã‚¹ã‚¹
+        case 'J':
+        case 'j': {
+            break;
+        }
+
+            //
+        case 'K':
+        case 'k': {
+            break;
+        }
+
+            // MIC ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹h
+        case 'L':
+        case 'l': {
+            // L ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹ãƒ•ã‚ªã‚¹yã‚¹ã‚¹ã‚¹ã‚¹ã‚¹hã‚¹ã‚¹ ã‚¹ã‚¹ã‚¹[ã‚¹hã‚¹ã‚¹ã‚¹ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹
+            String filename = param;
+
+            // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹wã‚¹é–§ã‚¦ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹
+            if (filename.trim().equals("")) {
+                // ã‚¹_ã‚¹Cã‚¹Aã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ã‚¹Jã‚¹ã‚¹ã‚¹ãƒˆãƒ•ã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹
+                filename = getFilename();
+                // ã‚¹_ã‚¹Cã‚¹Aã‚¹ã‚¹ã‚¹Oã‚¹ãƒŠã‚­ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Zã‚¹ã‚¹ã‚¹ã‚¹ã‚¹é»·ã‚¹ã‚¹ã‚¹
+                if (filename == null)
+                    break;
+            }
+
+            try {
+                // .MIC ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ãƒŒã¿æ¾ã‚½ã‚¹ã‚¹ã‚¹
+                comLoadMicFile(filename);
+
+                // ã‚¹vã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Jã‚¹Eã‚¹ã‚¹ã‚¹^ã‚¹ã‚¹ã‚¹Zã‚¹bã‚¹g
+                cpu.reg.setReg(Reg8085.PC, codeAddr);
+            } catch (IOException e) {
+                println("ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ãƒ•èª­ã¿æ¾ã‚½ã‚¹ã‚¹ãƒ³ã«è¶£ã‚½ã‚¹ã‚¹sã‚¹ã‚¹ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹B");
+            }
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ç§»é›£ã‚½ã‚¹
+        case 'M':
+        case 'm': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr, destAddr;
+
+            // ã‚¹Rã‚¹sã‚¹[ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr + 127;
+
+            // ã‚¹Rã‚¹sã‚¹[ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                destAddr = util.unhex(st.nextToken());
+            else
+                destAddr = endAddr + 1;
+
+            comMoveMemoryArea(startAddr, endAddr, destAddr);
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•è¨­æŠµã‚½ã‚¹Eã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Eã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'N':
+        case 'n': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            String labelName;
+            int addr;
+
+            int paramCount = st.countTokens();
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+            if (paramCount == 0) {
+                comDisplayPublicLabelInfo();
+                break;
+            }
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ ã‚¹ã‚¹ã‚¹ã‚¹
+            else if (paramCount == 1) {
+                labelName = st.nextToken();
+                comResetPublicLabel(labelName);
+            }
+
+            // ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ãƒ„ãªã‚‘ã‚½ã‚¹ ã‚¹ãƒ³æŠµã‚½ã‚¹
+            else if (paramCount == 2) {
+                // ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒ‹ã‚½ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹è¬«ã‚»
+                addr = util.unhex(st.nextToken());
+                labelName = st.nextToken();
+                comSetPublicLabel(labelName, addr);
+            }
+
+            else {
+                println("ã‚¹pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹.");
+                println("");
+            }
+            break;
+        }
+
+            //
+        case 'O':
+        case 'o': {
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ãƒ—ã‚¹ã‚¹ã‚¹eã‚¹Nã‚¹g ã‚¹ãƒ³å®šãƒ»ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹Eã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'P':
+        case 'p': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+            boolean resetProtect = false;
+
+            // ã‚¹vã‚¹ã‚¹ã‚¹eã‚¹Nã‚¹gã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr; // ã‚¹Pã‚¹oã‚¹Cã‚¹gã‚¹ã‚¹ã‚¹ã‚¹
+
+            // ã‚¹ãƒ³å®šã‹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens()) {
+                String str = st.nextToken();
+                resetProtect = (str.equals("R") || str.equals("r"));
+            }
+
+            comProtectMemoryArea(startAddr, endAddr, resetProtect);
+            break;
+        }
+
+            // ã‚¹fã‚¹oã‚¹bã‚¹Kã‚¹ãƒ•çµ‚ã‚¹ã‚¹
+        case 'Q':
+        case 'q': {
+            parent.onEndDebug();
+            shouldExit = true;
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹ãƒ•è¡¨ã‚¹ã‚¹ã‚¹Aã‚¹ãƒ¡é›†
+        case 'R':
+        case 'r': {
+            if (param.equals("X") || param.equals("x"))
+                comEditRegister();
+            else
+                comDumpRegister();
+            break;
+        }
+
+            //
+        case 'S':
+        case 's': {
+            break;
+        }
+
+            // ã‚¹vã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•ãƒˆã‚¹ã‚¹ã‚¹[ã‚¹X
+        case 'T':
+        case 't': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+            boolean onestep;
+
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = 0xFFFF;
+
+            // 1ã‚¹Xã‚¹eã‚¹bã‚¹vã‚¹uã‚¹ã‚¹ã‚¹[ã‚¹Nã‚¹ã‚¹ã‚¹H
+            if (st.hasMoreTokens())
+                onestep = true;
+            else
+                onestep = false;
+
+            comTraceProgram(startAddr, endAddr, onestep);
+            break;
+        }
+
+            // ã‚¹tã‚¹Aã‚¹Zã‚¹ã‚¹ã‚¹uã‚¹ã‚¹
+        case 'U':
+        case 'u': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr + 127;
+
+            comDisassemble(startAddr, endAddr);
+            break;
+        }
+
+            //
+        case 'V':
+        case 'v': {
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•æ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹oã‚¹ã‚¹
+        case 'W':
+        case 'w': {
+            StringTokenizer st = new StringTokenizer(param, ",");
+            int startAddr, endAddr;
+
+            // ã‚¹Jã‚¹nã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                startAddr = util.unhex(st.nextToken());
+            else
+                startAddr = cpu.reg.getReg(Reg8085.PC);
+
+            // ã‚¹Iã‚¹ã‚¹ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹ã‚¹è¬«ã‚»
+            if (st.hasMoreTokens())
+                endAddr = util.unhex(st.nextToken());
+            else
+                endAddr = startAddr + 127;
+
+            // ã‚¹Zã‚¹[ã‚¹uã‚¹ã‚¹ã‚¹ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹î’ã‚»ã‚‘ã‚½ã‚¹
+            String filename = null;
+            if (st.hasMoreTokens())
+                filename = st.nextToken();
+
+            // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹wã‚¹é–§ã‚¦ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹
+            if (filename == null || filename.trim().equals("")) {
+                // ã‚¹_ã‚¹Cã‚¹Aã‚¹ã‚¹ã‚¹Oã‚¹ã‚¹ã‚¹Jã‚¹ã‚¹ã‚¹ãƒˆãƒ•ã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹
+                filename = getFilename();
+                // ã‚¹_ã‚¹Cã‚¹Aã‚¹ã‚¹ã‚¹Oã‚¹ãƒŠã‚­ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Zã‚¹ã‚¹ã‚¹ã‚¹ã‚¹é»·ã‚¹ã‚¹ã‚¹
+                if (filename == null)
+                    break;
+                // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Oã‚¹ãƒ•ãƒ•ã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒŠã«æ‰˜ã‚½ã‚¹ã‚¹ãƒ³ã‚‘ã‚½ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+
+            }
+
+            try {
+                comWriteToFile(startAddr, endAddr, filename);
+            } catch (IOException e) {
+                println("ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ãƒ•æ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ³ã«è¶£ã‚½ã‚¹ã‚¹sã‚¹ã‚¹ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹ã‚¹ã‚¹.");
+            }
+
+            break;
+        }
+
+            //
+        case 'X':
+        case 'x': {
+            break;
+        }
+
+            // ã‚¹gã‚¹ã‚¹ã‚¹[ã‚¹Xã‚¹ã‚¹ã‚¹ãƒ•ã‚¹ã‚¹eã‚¹bã‚¹vã‚¹Iã‚¹[ã‚¹oã‚¹[ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ã‚¹ ã‚¹ãƒ³å®šãƒ»ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'Y':
+        case 'y': {
+            break;
+        }
+
+            // ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        case 'Z':
+        case 'z': {
+            comDisplayDebugInfo();
+            break;
+        }
+
+        }
+
+    }
+
+    // ***************************************************************************************************
+    // ***************************************************************************************************
+    // ã‚¹\ã‚¹ã‚¹ã‚¹p ã‚¹ãƒˆç”¨ã‚¹ã‚¹ã‚¹\ã‚¹bã‚¹hã‚¹Q
+
+    // ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹\ã‚¹ã‚¹
+    void printAddr(int addr) {
+        print(util.hex4(addr));
+    }
+
+    // ã‚¹sã‚¹ãƒ•å…ˆé ­ã‚¹ãƒ‹ã‚‘ã‚½ã‚¹ã‚¹ãƒˆã‚¢ã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹\ã‚¹ã‚¹
+    void printAddrAsLineHeader(int addr) {
+        println("");
+        printAddr(addr);
+        print(" ");
+    }
+
+    // ã‚¹ã‚¹ã‚¹ã‚œã‚³ã‚¹[ã‚¹hã‚¹î”ã‚«è¶£ã‚½ã‚¹ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ãƒˆè¿”ã‚‘ã‚½ã‚¹
+    String sprintOpecode(Instruction8085 inst) {
+        StringBuffer sb = new StringBuffer();
+
+        // ã‚¹ã‚¹ã‚¹ã‚œã‚³ã‚¹[ã‚¹hã‚¹ã‚¹1ã‚¹oã‚¹Cã‚¹gã‚¹ã‚œã‚‘ã‚½ã‚¹\ã‚¹ã‚¹
+        sb.append(util.hex2(inst.getOpecode()) + " ");
+
+        // ã‚¹ã‚¹ã‚¹ã‚œã‚µã‚¹Cã‚¹Yã‚¹ãƒä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ 2ã‚¹oã‚¹Cã‚¹gã‚¹ã‚œã€3ã‚¹oã‚¹Cã‚¹gã‚¹ã‚œã‚‘ã‚½ã‚¹\ã‚¹ã‚¹
+        if (inst.getSize() == 1)
+            sb.append(util.space(8));
+        else if (inst.getSize() == 2)
+            sb.append(util.hex2(inst.getB2()) + util.space(6));
+        else if (inst.getSize() == 3)
+            sb.append(util.hex2(inst.getB2()) + " " + util.hex2(inst.getB3())
+                    + util.space(3));
+
+        return sb.toString();
+    }
+
+    // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹\ã‚¹ã‚¹ã‚¹ãƒ•ãƒ˜ã‚¹bã‚¹_
+    void printRegistersHeader() {
+        println(" A  B  C  D  E  H  L  SP   PC  Z C S P AC");
+    }
+
+    // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹ãƒ•å€¤ã‚¹ã‚¹\ã‚¹ã‚¹
+    void printRegisters() {
+        print(util.hex2(cpu.reg.getReg(Reg8085.A)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.B)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.C)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.D)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.E)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.H)) + " "
+                + util.hex2(cpu.reg.getReg(Reg8085.L)) + " "
+                + util.hex4(cpu.reg.getReg(Reg8085.SP)) + " "
+                + util.hex4(cpu.reg.getReg(Reg8085.PC)) + " "
+                + (cpu.reg.getFlag(Reg8085.Zf) ? 1 : 0) + " "
+                + (cpu.reg.getFlag(Reg8085.Cf) ? 1 : 0) + " "
+                + (cpu.reg.getFlag(Reg8085.Sf) ? 1 : 0) + " "
+                + (cpu.reg.getFlag(Reg8085.Pf) ? 1 : 0) + " "
+                + (cpu.reg.getFlag(Reg8085.ACf) ? 1 : 0));
+    }
+
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹eã‚¹\ã‚¹ã‚¹ã‚¹ãƒ•ã¨ã‚‘ã‚½ã‚¹ã‚¹ãƒ•ãƒ˜ã‚¹bã‚¹_
+    void printMemoryHeader() {
+        println("Addr  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0123456789ABCDEF");
+    }
+
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹eã‚¹ã‚¹ã‚¹ã‚¹sã‚¹\ã‚¹ã‚¹ ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹{ã‚¹_ã‚¹ã‚¹ã‚¹vã‚¹{ã‚¹Aã‚¹Xã‚¹Lã‚¹[
+    void printMemoryAreaOneLine(int startAddr, int endAddr) {
+        StringBuffer sbDump = new StringBuffer();
+        StringBuffer sbHead = new StringBuffer();
+        StringBuffer sbAscii = new StringBuffer();
+
+        // ã‚¹wã‚¹bã‚¹_ã‚¹ãƒ‹ã‚‘ã‚½ã‚¹ã‚¹ãƒˆã®ã‚¢ã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ãƒ‹ã€ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•é›£ã‚½ã‚¹ã‚¹eã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ãƒŒã‚Šç€ã‚¹ã‚¹ã‚¹ãƒ¯ã§ã®å…·ã‚½ã‚¹ã‚¹ã‚¹ãƒ­ã®åŒ…ã‚½ã‚¹ã‚¹ã‚¹
+        sbHead.append(util.hex4(startAddr % 0xFFF0) + " ");
+        sbAscii.append('*');
+        for (int addr = startAddr & 0xFFF0; addr < startAddr; addr++)
+            sbDump.append(util.space(3));
+
+        // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹_ã‚¹ã‚¹ã‚¹vã‚¹ã‚¹\ã‚¹ã‚¹
+        for (int addr = startAddr; addr <= endAddr; addr++) {
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•é›£ã‚½ã‚¹ã‚¹eã‚¹ãƒ‹å¯¾ä¼šã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Aã‚¹Xã‚¹Lã‚¹[ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+            char c = (char) mem.getValue(addr);
+            sbDump.append(util.hex2(c));
+            sbAscii.append(util.makeValidChar(c));
+            if (addr % 0x10 != 7)
+                sbDump.append(" ");
+            else
+                sbDump.append("-");
+        }
+
+        // 16ã‚¹oã‚¹Cã‚¹gã‚¹ãƒé”ã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ç«­ã‚©
+        for (int addr = endAddr + 1; addr < ((endAddr + 0x10) & 0xFFF0); addr++)
+            sbDump.append(util.space(3));
+
+        println("" + sbHead + sbDump + sbAscii);
+    }
+
+    // ã‚¹gã‚¹ã‚¹ã‚¹[ã‚¹Xã‚¹ã‚¹ã‚¹iã‚¹ã‚¹ã‚¹ã‚œã®ã‚¢ã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹Aã‚¹ã‚¹ã‚¹ã‚œã‚³ã‚¹[ã‚¹hã‚¹Aã‚¹jã‚¹[ã‚¹ã‚¹ã‚¹jã‚¹bã‚¹Nã‚¹jã‚¹ã‚¹\ã‚¹ã‚¹
+    void printTraceInfo(Instruction8085 inst) {
+        StringBuffer sbAddr = new StringBuffer();
+        StringBuffer sbInst = new StringBuffer();
+
+        // ã‚¹ã‚¹ã‚¹ã‚œã®ã‚¢ã‚¹hã‚¹ã‚¹ã‚¹X
+        sbAddr.append(util.hex4(cpu.reg.getReg(Reg8085.PC)));
+
+        // ã‚¹ã‚¹ã‚¹ã‚œã‚³ã‚¹[ã‚¹hã‚¹Aã‚¹jã‚¹[ã‚¹ã‚¹ã‚¹jã‚¹bã‚¹N
+        sbInst.append(sprintOpecode(inst) + inst.toString());
+        int len = sbAddr.length() + sbInst.length();
+        if (len < 23)
+            sbInst.append("\t\t");
+        else
+            sbInst.append("\t");
+
+        print("" + sbAddr + " " + sbInst);
+    }
+
+    // ***************************************************************************************************
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹bã‚¹hã‚¹Q
+
+    // ***************************************************************************************************
+    // A ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ãƒæ˜“ã‚¢ã‚¹Zã‚¹ã‚¹ã‚¹uã‚¹ã‚¹
+    void comAssemble(int startAddr) {
+        int addr = startAddr;
+        String s;
+        int com_bytes;
+
+        SimpleAssembler asm = new SimpleAssembler(cpu);
+
+        do {
+            // ã‚¹vã‚¹ã‚¹ã‚¹ã‚¹ã‚¹vã‚¹g addr:
+            print(util.hex4(addr) + ": ");
+            s = readln();
+
+            if (s.trim().equals(""))
+                break;
+
+            // ã‚¹ã‚¹sã‚¹Aã‚¹Zã‚¹ã‚¹ã‚¹uã‚¹ã‚¹ ã‚¹ãƒå¥‡ã‚½ã‚¹ã‚¹ã‚¹ã‚¹é»·ã‚¹ã‚¹oã‚¹Cã‚¹gã‚¹ã‚¹ã‚¹î’ã‚»ã‚‘ã‚½ã‚¹
+            try {
+                com_bytes = asm.assemble(addr, s);
+            } catch (OnEncodeException e) {
+                println(e.message);
+                continue;
+            }
+
+            // ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹iã‚¹ã‚œã‚‘ã‚½ã‚¹
+            addr += com_bytes;
+
+        } while (true);
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // B ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹uã‚¹ã‚¹ã‚¹[ã‚¹Nã‚¹|ã‚¹Cã‚¹ã‚¹ã‚¹gã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+    void comDisplayBreakPointInfo() {
+        if (breakPoints.size() == 0) {
+            println("No break points.");
+            println("");
+            return;
+        }
+
+        println("");
+        println("Break points        count: " + breakPoints.size());
+        println(" addr\tcount\tlabel");
+        for (int num = 0; num < breakPoints.size(); num++) {
+            BreakPoint8085 b = breakPoints.getBreakPointAt(num);
+            print("" + util.hex4(b.addr));
+            print("\t   ");
+            print("" + b.count);
+            println("");
+        }
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹uã‚¹ã‚¹ã‚¹[ã‚¹Nã‚¹|ã‚¹Cã‚¹ã‚¹ã‚¹gã‚¹ãƒ•è¨­æŠµã‚½ã‚¹Eã‚¹ã‚¹ã‚¹ã‚¹
+    void comSetBreakPoint(int addr, int count) {
+        try {
+            breakPoints.addBreakPoint(addr, count);
+        } catch (BreakPointListException e) {
+            println(e.message);
+        }
+
+        println("");
+    }
+
+    void comResetBreakPoint(int addr) {
+        try {
+            breakPoints.delBreakPoint(addr);
+            println("Break point at address " + util.hex4(addr)
+                    + " is deleted. OK.");
+        } catch (BreakPointListException e) {
+            println(e.message);
+        }
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // D ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹eã‚¹ãƒ•è¡¨ã‚¹ã‚¹
+    void comDumpMemoryArea(int startAddr, int endAddr) {
+        // ã‚¹Sã‚¹ãƒ•ã®ãƒ˜ã‚¹bã‚¹_
+        printMemoryHeader();
+
+        // ã‚¹ã‚¹sã‚¹ãƒŠè¶£ã‚½ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹é¼¾
+        if ((startAddr & 0xFFF0) == (endAddr & 0xFFF0))
+            printMemoryAreaOneLine(startAddr, endAddr);
+
+        // ã‚¹ã‚¹sã‚¹ãƒæ“¾ã‚½ã‚¹ãƒã‚ãŸã‚¹ã‚¹é¼¾
+        else {
+            int addr = startAddr;
+
+            // ã‚¹ãƒŠæ“¾ã‚½ã‚¹ã‚¹ãƒ•è¡Œ
+            printMemoryAreaOneLine(startAddr, (startAddr & 0xFFF0) + 0x0f);
+
+            // ã‚¹ã‚¹ã‚¹ãƒ¤ã®è¡Œã‚¹Aã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹é¼¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹B
+            for (addr = (startAddr + 0x10) & 0xFFF0; addr <= (endAddr - 0x10); addr += 0x10)
+                printMemoryAreaOneLine(addr, addr + 0x0f);
+
+            // ã‚¹ãƒŠé¯‰ã‚½ã‚¹ãƒ•è¡Œ
+            if ((addr & 0xFFF0) == (endAddr & 0xFFF0))
+                printMemoryAreaOneLine(addr, endAddr);
+        }
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // E ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ç·¨é›†
+    void comEditMemoryArea(int startAddr) {
+        // ã‚¹Sã‚¹ãƒ•ã®ãƒ˜ã‚¹bã‚¹_
+        printMemoryHeader();
+
+        int addr = startAddr;
+        int blankaddr = startAddr & 0x0F;
+
+        // ã‚¹\ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ˜ã‚½ã‚¹ã‚¹[ã‚¹v
+        while (true) {
+            // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹eã‚¹ã‚¹\ã‚¹ã‚¹
+            printMemoryAreaOneLine(addr, (addr & 0xFFF0) + 0x0F);
+
+            // ã‚¹ã‚¹ãƒ˜ãƒ˜ã‚¹bã‚¹_
+            print("     " + util.space(blankaddr * 3));
+
+            // ã‚¹ã‚¹ã‚¹
+            String s = readln();
+
+            // ã‚¹ã‚¹ãƒ˜ã‚‘ã‚½ã‚¹ã‚¹ãƒã‚‘ã‚½ã‚¹ã‚¹ã‚¹ãƒ›ç·¨é›†ã‚¹ã‚¹ã‚¹Iã‚¹ã‚¹
+            if (s.trim().equals(""))
+                break;
+
+            // ã‚¹ã‚¹ãƒ˜ã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹
+            try {
+                for (int i = 0; i < 0x10; i++)
+                    mem.setValue(
+                            addr + i,
+                            !(s.substring(3 * i, 3 * i + 2).equals("  ")) ? util
+                                    .unhex(s.substring(3 * i, 3 * i + 2)) : mem
+                                    .getValue(addr + i));
+            } catch (StringIndexOutOfBoundsException e) {
+            }
+
+            // ã‚¹ã‚¹ã‚¹ãƒé€²ã‚¹ã‚¹
+            addr = (addr & 0xFFF0) + 0x10;
+            blankaddr = 0;
+        }
+
+    }
+
+    // ***************************************************************************************************
+    // F ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ãƒ•ã‚¹Bã‚¹ã‚¹
+    void comFillMemoryArea(int startAddr, int endAddr, short value) {
+        for (int addr = startAddr; addr <= endAddr; addr++)
+            mem.setValue(addr, value);
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // G ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹s
+    void comRunProgram(int startAddr, int endAddr) {
+        cpu.reg.setReg(Reg8085.PC, startAddr);
+        cpu.restart();
+
+        while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
+            try {
+                cpu.execute(cpu.decode(cpu.fetch()));
+            } catch (OnBreakPointException e) {
+                println(e.message);
+            }
+
+            if (cpu.isHalted())
+                break;
+        }
+    }
+
+    // ***************************************************************************************************
+    // L ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // MICã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ãƒŒã¿æ¾ã‚½ã‚¹ã‚¹ã‚¹
+    public void comLoadMicFile(String filename) throws IOException {
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Iã‚¹[ã‚¹vã‚¹ã‚¹
+        DataInputStream d = new DataInputStream(new BufferedInputStream(
+                new FileInputStream(filename)));
+
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ ID ã‚¹ãƒ•ãƒã‚¹Fã‚¹bã‚¹N
+        byte id1 = d.readByte();
+        byte id2 = d.readByte();
+        if (!(id1 == 80/* 'P' */&& id2 == 72/* 'H' */)) {
+            throw new IOException();
+        }
+
+        // ã‚¹Rã‚¹[ã‚¹hã‚¹ãƒ•èŒ¨ã‚½ã‚¹Eã‚¹ã‚¹ãƒ‹é ˜èŒ¨ã‚½ã‚¹fã‚¹[ã‚¹^ã‚¹ãƒ•å–å¾—
+        codeAddr = d.readUnsignedShort();
+        codeSize = d.readUnsignedShort();
+        workSize = d.readUnsignedShort();
+        workAddr = d.readUnsignedShort();
+
+        codeAddr = util.swapEndian(codeAddr);
+        codeSize = util.swapEndian(codeSize);
+        workAddr = util.swapEndian(workAddr);
+        workSize = util.swapEndian(workSize);
+
+        // ã‚¹Rã‚¹[ã‚¹hã‚¹ã‚¹ã‚¹è¬«ã‚»ã‚¹ã‚¹ã‚¹Aã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ ã‚¹ãƒæ ¼ã‚¹[
+        for (int addr = codeAddr; addr < codeAddr + codeSize; addr++)
+            mem.setValue(addr, d.readUnsignedByte());
+
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ ID ã‚¹ãƒ•ãƒã‚¹Fã‚¹bã‚¹N
+        byte id3 = d.readByte();
+        byte id4 = d.readByte();
+        if (!(id3 == 80/* 'P' */&& id4 == 66/* 'B' */)) {
+            throw new IOException();
+        }
+
+        // PUBLIC ã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ãƒ•ãƒ‡ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹è¬«ã‚»
+        int numOfPublicLabels = d.readUnsignedShort();
+        numOfPublicLabels = util.swapEndian(numOfPublicLabels);
+
+        byte[] buf = new byte[8];
+        String publicLabelName;
+        int publicLabelAddr;
+
+        for (int num = 0; num < numOfPublicLabels; num++) {
+            d.read(buf);
+            publicLabelName = new String(buf);
+            publicLabelAddr = d.readUnsignedShort();
+            publicLabelAddr = util.swapEndian(publicLabelAddr);
+            publicLabels.addElement(new PublicLabel8085(publicLabelName,
+                    publicLabelAddr));
+        }
+
+        d.close();
+        // ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+        comDisplayDebugInfo();
+        comDisplayPublicLabelInfo();
+    }
+
+    // ***************************************************************************************************
+    // M ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ç§»é›£ã‚½ã‚¹
+    void comMoveMemoryArea(int startAddr, int endAddr, int destAddr) {
+        for (int addr = 0; addr <= endAddr - startAddr; addr++)
+            mem.setValue(destAddr + addr, mem.getValue(startAddr + addr));
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // N ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+    void comDisplayPublicLabelInfo() {
+        if (publicLabels.size() == 0) {
+            println("No public labels.");
+            println("");
+            return;
+        }
+
+        println("");
+        println("Public labels        count: " + publicLabels.size());
+        println(" name      addr");
+        for (int num = 0; num < publicLabels.size(); num++) {
+            PublicLabel8085 p = publicLabels.getPublicLabelAt(num);
+            print("" + p.name);
+            print("\t   ");
+            print("" + util.hex4(p.addr));
+            println("");
+        }
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹pã‚¹uã‚¹ã‚¹ã‚¹bã‚¹Nã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ãƒ•è¨­æŠµã‚½ã‚¹Eã‚¹ã‚¹ã‚¹ã‚¹
+    void comSetPublicLabel(String labelName, int addr) {
+        try {
+            publicLabels.addPublicLabel(labelName, addr);
+        } catch (PublicLabelListException e) {
+            println(e.message);
+        }
+
+        println("");
+    }
+
+    void comResetPublicLabel(String labelName) {
+        try {
+            publicLabels.delPublicLabel(labelName);
+            println("Public label " + labelName + " is deleted. OK.");
+        } catch (PublicLabelListException e) {
+            println(e.message);
+        }
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // P ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒ•èŒ¨ã‚½ã‚¹ãƒ•ãƒ—ã‚¹ã‚¹ã‚¹eã‚¹Nã‚¹gã‚¹ãƒ•è¨­æŠµã‚½ã‚¹Eã‚¹ã‚¹ã‚¹ã‚¹
+    void comProtectMemoryArea(int startAddr, int endAddr, boolean resetProtect) {
+        for (int addr = startAddr; addr <= endAddr; addr++)
+            mem.setReadOnly(addr, !resetProtect);
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // R ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹ãƒ•ä¿è¶£ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹lã‚¹ã‚¹\ã‚¹ã‚¹
+    void comDumpRegister() {
+        printRegistersHeader();
+        printRegisters();
+        println("");
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹ãƒ•ä¿è¶£ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ãƒˆã‚‘ã‚½ã‚¹ã‚¹ã‚¹lã‚¹ã‚¹ãƒ¡é›†
+    void comEditRegister() {
+        // ã‚¹ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹lã‚¹ã‚¹\ã‚¹ã‚¹
+        printRegistersHeader();
+        printRegisters();
+        println("");
+
+        // ã‚¹ã‚¹sã‚¹ãƒŒã¿æ¾ã‚½ã‚¹ã‚¹ã‚¹ãƒŠã€ã‚¹ã‚¹ã‚¹ã‚¹
+        String s = readln();
+
+        try {
+            cpu.reg.setReg(
+                    Reg8085.A,
+                    !(s.substring(0, 2).equals("  ")) ? (short) util.unhex(s
+                            .substring(0, 2)) : cpu.reg.getReg(Reg8085.A));
+            cpu.reg.setReg(
+                    Reg8085.B,
+                    !(s.substring(3, 5).equals("  ")) ? (short) util.unhex(s
+                            .substring(3, 5)) : cpu.reg.getReg(Reg8085.B));
+            cpu.reg.setReg(
+                    Reg8085.C,
+                    !(s.substring(6, 8).equals("  ")) ? (short) util.unhex(s
+                            .substring(6, 8)) : cpu.reg.getReg(Reg8085.C));
+            cpu.reg.setReg(
+                    Reg8085.D,
+                    !(s.substring(9, 11).equals("  ")) ? (short) util.unhex(s
+                            .substring(9, 11)) : cpu.reg.getReg(Reg8085.D));
+            cpu.reg.setReg(
+                    Reg8085.E,
+                    !(s.substring(12, 14).equals("  ")) ? (short) util.unhex(s
+                            .substring(12, 14)) : cpu.reg.getReg(Reg8085.E));
+            cpu.reg.setReg(
+                    Reg8085.H,
+                    !(s.substring(15, 17).equals("  ")) ? (short) util.unhex(s
+                            .substring(15, 17)) : cpu.reg.getReg(Reg8085.H));
+            cpu.reg.setReg(
+                    Reg8085.L,
+                    !(s.substring(18, 20).equals("  ")) ? (short) util.unhex(s
+                            .substring(18, 20)) : cpu.reg.getReg(Reg8085.L));
+            cpu.reg.setReg(
+                    Reg8085.SP,
+                    !(s.substring(21, 25).equals("    ")) ? util.unhex(s
+                            .substring(21, 25)) : cpu.reg.getReg(Reg8085.SP));
+            cpu.reg.setReg(
+                    Reg8085.PC,
+                    !(s.substring(26, 30).equals("    ")) ? util.unhex(s
+                            .substring(26, 30)) : cpu.reg.getReg(Reg8085.PC));
+            cpu.reg.setFlag(Reg8085.Zf,
+                    !(s.substring(31, 32).equals(" ")) ? s.substring(31, 32)
+                            .equals("1") : cpu.reg.getFlag(Reg8085.Zf));
+            cpu.reg.setFlag(Reg8085.Cf,
+                    !(s.substring(33, 34).equals(" ")) ? s.substring(33, 34)
+                            .equals("1") : cpu.reg.getFlag(Reg8085.Cf));
+            cpu.reg.setFlag(Reg8085.Sf,
+                    !(s.substring(35, 36).equals(" ")) ? s.substring(35, 36)
+                            .equals("1") : cpu.reg.getFlag(Reg8085.Sf));
+            cpu.reg.setFlag(Reg8085.Pf,
+                    !(s.substring(37, 38).equals(" ")) ? s.substring(37, 38)
+                            .equals("1") : cpu.reg.getFlag(Reg8085.Pf));
+            cpu.reg.setFlag(Reg8085.ACf,
+                    !(s.substring(39, 40).equals(" ")) ? s.substring(39, 40)
+                            .equals("1") : cpu.reg.getFlag(Reg8085.ACf));
+        } catch (StringIndexOutOfBoundsException e) {
+        }
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // T ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹gã‚¹ã‚¹ã‚¹[ã‚¹X
+    void comTraceProgram(int startAddr, int endAddr, boolean traceOneStep) {
+        String message = null;
+        Instruction8085 inst;
+
+        keyEchoOff();
+        cpu.restart();
+
+        try {
+            cpu.reg.setReg(Reg8085.PC, startAddr);
+
+            // ã‚¹wã‚¹bã‚¹_ã‚¹ã‚¹\ã‚¹ã‚¹
+            println("Addr Code       Mnemonic         A  B  C  D  E  H  L  SP   PC  Z C S P AC");
+
+            // ã‚¹ã‚¹ã‚¹sã‚¹ã‚¹ã‚¹[ã‚¹v
+            while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
+                // ã‚¹ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹ã‚¹è¬«ã‚»
+                inst = cpu.decode(cpu.fetch());
+
+                // ã‚¹ã‚¹ã‚¹sã‚¹Oã‚¹ãƒ•æ“¾ã‚½ã‚¹ãƒ¤ã‚‘ã‚½ã‚¹\ã‚¹ã‚¹
+                printTraceInfo(inst);
+
+                // ã‚¹ã‚¹ã‚¹ã‚œã®è¶£ã‚½ã‚¹ã‚¹sã‚¹ãƒ¡ã‚‘ã‚½ã‚¹
+                if (traceOneStep) {
+                    int c = read();
+                    if (c == 'Q' || c == 'q')
+                        break;
+                }
+                // ã‚¹ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹ã‚¹ã‚¹ã‚¹s
+                try {
+                    cpu.execute(inst);
+                } catch (OnBreakPointException e) {
+                    message = e.message;
+                }
+
+                // ã‚¹ã‚¹ã‚¹sã‚¹ã‚¹ã‚¹ãƒã®ã‚½ã‚¹ã‚¹Wã‚¹Xã‚¹^ã‚¹ã‚¹\ã‚¹ã‚¹
+                printRegisters();
+                println("");
+
+                if (message != null)
+                    println(message);
+
+                if (cpu.isHalted())
+                    break;
+
+            }
+        } finally {
+            keyEchoOn();
+        }
+
+    }
+
+    // ***************************************************************************************************
+    // U ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹tã‚¹Aã‚¹Zã‚¹ã‚¹ã‚¹uã‚¹ã‚¹
+    void comDisassemble(int startAddr, int endAddr) {
+
+        int orgPC = cpu.reg.getReg(Reg8085.PC);
+        int newPC;
+        Instruction8085 inst;
+
+        cpu.reg.setReg(Reg8085.PC, startAddr);
+        while (cpu.reg.getReg(Reg8085.PC) <= endAddr) {
+            inst = cpu.decode(cpu.fetch());
+
+            // ã‚¹Aã‚¹hã‚¹ã‚¹ã‚¹Xã‚¹ã‚¹\ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Aã‚¹ã‚¹ã‚¹ã‚œã‚³ã‚¹[ã‚¹hã‚¹Aã‚¹Iã‚¹yã‚¹ã‚¹ã‚¹ã‚¹ã‚¹hã‚¹Aã‚¹jã‚¹[ã‚¹ã‚¹ã‚¹jã‚¹bã‚¹Nã‚¹ãƒ•è¡¨ã‚¹ã‚¹
+            printTraceInfo(inst);
+            println("");
+
+            // ã‚¹jã‚¹[ã‚¹ã‚¹ã‚¹jã‚¹bã‚¹Nã‚¹ã‚¹ HLT ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Iã‚¹ã‚¹
+            if (inst.getMnemonic().equals("HLT"))
+                break;
+
+            // ã‚¹ã‚¹ã‚¹ãƒ•å„ã‚½ã‚¹ã‚¹ã‚œã‚‘ã‚½ã‚¹
+            newPC = cpu.reg.getReg(Reg8085.PC) + inst.getSize();
+            cpu.reg.setReg(Reg8085.PC, newPC);
+        }
+
+        // PC ã‚¹lã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ãƒæˆ»ã‚‘ã‚½ã‚¹
+        cpu.reg.setReg(Reg8085.PC, orgPC);
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // W ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹eã‚¹ã‚¹ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ãƒæ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹oã‚¹ã‚¹
+    void comWriteToFile(int startaddr, int endaddr, String filename)
+            throws IOException {
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Iã‚¹[ã‚¹vã‚¹ã‚¹
+        DataOutputStream d = new DataOutputStream(new BufferedOutputStream(
+                new FileOutputStream(filename)));
+
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ ID ã‚¹ãƒ•æ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        d.writeByte(80/* P */);
+        d.writeByte(72/* H */);
+
+        // ã‚¹Rã‚¹[ã‚¹hã‚¹ãƒ•èŒ¨ã‚½ã‚¹Eã‚¹ã‚¹ãƒ‹é ˜èŒ¨ã‚½ã‚¹fã‚¹[ã‚¹^ã‚¹ãƒ•æ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        int temp_codeAddr = startaddr;
+        int temp_codeSize = endaddr - startaddr + 1;
+        int temp_workAddr = workAddr;
+        int temp_workSize = workSize;
+
+        int swaped_codeAddr = util.swapEndian(temp_codeAddr);
+        int swaped_codeSize = util.swapEndian(temp_codeSize);
+        int swaped_workAddr = util.swapEndian(temp_workAddr);
+        int swaped_workSize = util.swapEndian(temp_workSize);
+
+        d.writeShort((short) swaped_codeAddr);
+        d.writeShort((short) swaped_codeSize);
+        d.writeShort((short) swaped_workSize);
+        d.writeShort((short) swaped_workAddr);
+
+        // ã‚¹Rã‚¹[ã‚¹hã‚¹ã‚¹ã‚¹è¬«ã‚»ã‚¹ã‚¹ã‚¹Aã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ãƒæ ¼ã‚¹[
+        for (int addr = temp_codeAddr; addr < temp_codeAddr + temp_codeSize; addr++)
+            d.writeByte((byte) mem.getValue(addr));
+
+        // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ ID ã‚¹ãƒ•æ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        d.writeByte(80/* P */);
+        d.writeByte(66/* B */);
+
+        // PUBLIC ã‚¹ã‚¹ã‚¹xã‚¹ã‚¹ã‚¹ãƒ•ãƒ‡ã‚¹[ã‚¹^ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹
+        d.writeShort(util.swapEndian(publicLabels.size()));
+
+        for (int num = 0; num < publicLabels.size(); num++) {
+            PublicLabel8085 p = publicLabels.getPublicLabelAt(num);
+            for (int i = 0; i < 8; i++)
+                d.writeByte((byte) p.name.charAt(i));
+
+            d.writeShort(util.swapEndian(p.addr));
+        }
+
+        d.close();
+        println("ã‚¹ã‚¹ã‚¹ã‚¹ãƒæ“¾ã‚½ã‚¹ã‚¹ã‚¹ã‚¹oã‚¹ã‚¹ã‚¹ãƒ¯ã‚‘ã‚½ã‚¹ã‚¹ã‚¹.");
+    }
+
+    // ***************************************************************************************************
+    // Z ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹h
+    // ***************************************************************************************************
+    // ã‚¹fã‚¹oã‚¹bã‚¹Oã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+    void comDisplayDebugInfo() {
+        println("");
+        if (codeSize > 0)
+            println("code: " + util.hex4(codeAddr) + " - "
+                    + util.hex4(codeAddr + codeSize - 1));
+        else
+            println("code: none.");
+
+        if (workSize > 0)
+            println("work: " + util.hex4(workAddr) + " - "
+                    + util.hex4(workAddr + workSize - 1));
+        else
+            println("work: none.");
+
+        println("");
+    }
+
+    // ***************************************************************************************************
+    // ***************************************************************************************************
+    // ã‚¹ã‚¹ã‚¹ãƒ•æ‰˜ã‚½ã‚¹ ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹bã‚¹hã‚¹Q
+
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹}ã‚¹ã‚¹ã‚¹hã‚¹ã‚¹ã‚¹è¬«ã‚»
+    public String getCommand() {
+        print(">");
+        return input.readln();
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹tã‚¹@ã‚¹Cã‚¹ã‚¹ã‚¹ã‚¹ã‚¹î’ã‚»ã‚‘ã‚½ã‚¹ FileDialog ã‚¹ã‚¹ã‚¹gã‚¹ã‚¹
+    public String getFilename() {
+        FileDialog fd = new FileDialog(frame, "Open MIC File");
+        fd.setVisible(true);
+        if (fd.getDirectory() != null && fd.getFile() != null)
+            return fd.getDirectory() + fd.getFile();
+        else
+            return null;
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹ã‚¹ã‚¹\ã‚¹[ã‚¹ã‚¹ã‚¹ãƒåŒ…ã‚½ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹\ã‚¹ã‚¹
+    public void print(String s) {
+        output.append(s);
+    }
+
+    public void println(String s) {
+        output.append(s + "\n");
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹ã‚¹ã‚¹\ã‚¹[ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹é€¡ã‚«ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹è¬«ã‚»
+    public String readln() {
+        return input.readln();
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹Rã‚¹ã‚¹ã‚¹\ã‚¹[ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹Pã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹ã‚¹è¬«ã‚»
+    public int read() {
+        return input.read();
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹Lã‚¹[ã‚¹Gã‚¹Rã‚¹[ã‚¹ã‚¹ã‚¹ã‚¹
+    public void keyEchoOff() {
+        input.echoOff();
+    }
+
+    // ***************************************************************************************************
+    // ã‚¹Lã‚¹[ã‚¹Gã‚¹Rã‚¹[ã‚¹Lã‚¹ã‚¹
+    public void keyEchoOn() {
+        input.echoOn();
+    }
 
 }

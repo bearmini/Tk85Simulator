@@ -1,4 +1,4 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.util.Vector;
 
@@ -10,12 +10,12 @@ public class BreakPointList extends Vector<BreakPoint8085> {
 	private static final long serialVersionUID = -4373536766987022234L;
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public BreakPointList() {
 	}
 
 	// ***************************************************************************************************
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ğƒŠƒXƒg‚É’Ç‰Á
+	// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’ãƒªã‚¹ãƒˆã«è¿½åŠ 
 	public void addBreakPoint(int addr, int count)
 			throws BreakPointListException {
 		if (existBreakPoint(addr))
@@ -27,7 +27,7 @@ public class BreakPointList extends Vector<BreakPoint8085> {
 	}
 
 	// ***************************************************************************************************
-	// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ğƒŠƒXƒg‚©‚çíœ
+	// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’ãƒªã‚¹ãƒˆã‹ã‚‰å‰Šé™¤
 	public void delBreakPoint(int addr) throws BreakPointListException {
 		try {
 			removeElementAt(getBreakPointIndex(addr));
@@ -37,20 +37,20 @@ public class BreakPointList extends Vector<BreakPoint8085> {
 	}
 
 	// ***************************************************************************************************
-	// w’è‚µ‚½ƒAƒhƒŒƒX‚ÌƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ª‰½”Ô–Ú‚©
+	// æŒ‡å®šã—ãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã®ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆãŒä½•ç•ªç›®ã‹
 	public int getBreakPointIndex(int addr) throws BreakPointListException {
 		for (int i = 0; i < size(); i++) {
 			BreakPoint8085 b = (BreakPoint8085) elementAt(i);
 			if (b.addr == addr)
 				return i;
 		}
-		// Œ©‚Â‚©‚ç‚È‚©‚Á‚½‚ç
+		// è¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰
 		throw new BreakPointListException("Break point at address "
 				+ util.hex4(addr) + " is not defined.");
 	}
 
 	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒAƒhƒŒƒX‚É‘Î‰‚·‚éƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ª‚ ‚é‚©‚Ç‚¤‚©
+	// æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã«å¯¾å¿œã™ã‚‹ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆãŒã‚ã‚‹ã‹ã©ã†ã‹
 	public boolean existBreakPoint(int addr) {
 		for (int i = 0; i < size(); i++) {
 			BreakPoint8085 p = (BreakPoint8085) elementAt(i);
@@ -62,19 +62,19 @@ public class BreakPointList extends Vector<BreakPoint8085> {
 	}
 
 	// ***************************************************************************************************
-	// index ”Ô–Ú‚ÌƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ğ•Ô‚·
+	// index ç•ªç›®ã®ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’è¿”ã™
 	public BreakPoint8085 getBreakPointAt(int index) {
 		return (BreakPoint8085) elementAt(index);
 	}
 
 	// ***************************************************************************************************
-	// w’è‚³‚ê‚½ƒAƒhƒŒƒX‚É‘Î‰‚·‚éƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ğ•Ô‚·
+	// æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒ‰ãƒ¬ã‚¹ã«å¯¾å¿œã™ã‚‹ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆã‚’è¿”ã™
 	public BreakPoint8085 toBreakPoint(int addr) {
 		for (int i = 0; i < size(); i++)
 			if (((BreakPoint8085) elementAt(i)).addr == addr)
 				return (BreakPoint8085) elementAt(i);
 
-		// ƒuƒŒ[ƒNƒ|ƒCƒ“ƒg‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½‚çAd•û‚ª‚È‚¢‚©‚ç nil ‚ğ•Ô‚·
+		// ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸã‚‰ã€ä»•æ–¹ãŒãªã„ã‹ã‚‰ nil ã‚’è¿”ã™
 		return null;
 	}
 

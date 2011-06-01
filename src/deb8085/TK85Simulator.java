@@ -1,10 +1,10 @@
-package deb8085;
+ï»¿package deb8085;
 
 import java.awt.Frame;
 
 //***************************************************************************************************
 //***************************************************************************************************
-/* TK85ƒVƒ~ƒ…ƒŒ[ƒ^ƒNƒ‰ƒX */
+/* TK85ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚¿ã‚¯ãƒ©ã‚¹ */
 public class TK85Simulator extends Thread {
 	SimulatorParent parent;
 
@@ -14,22 +14,22 @@ public class TK85Simulator extends Thread {
 	TK85LED led;
 
 	public CPU8085 cpu; // CPU
-	public Mem8085 mem; // ƒƒ‚ƒŠ
-	Parallel8255 parallelio; // ƒpƒ‰ƒŒƒ‹IC 8255
+	public Mem8085 mem; // ãƒ¡ãƒ¢ãƒª
+	Parallel8255 parallelio; // ãƒ‘ãƒ©ãƒ¬ãƒ«IC 8255
 	DMAController8085 dmac;
 
 	boolean isWait = false;
 
 	int instructionCount = -1;
-	public boolean step = false; // ƒXƒeƒbƒvÀs‚·‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO
+	public boolean step = false; // ã‚¹ãƒ†ãƒƒãƒ—å®Ÿè¡Œã™ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°
 
-	// ƒpƒ‰ƒŒƒ‹IC‚Ìƒ|[ƒg”Ô†
+	// ãƒ‘ãƒ©ãƒ¬ãƒ«ICã®ãƒãƒ¼ãƒˆç•ªå·
 	static final int PORT_A = 0xf8;
 	static final int PORT_B = 0xf9;
 	static final int PORT_C = 0xfa;
 	static final int CTRLW = 0xfb;
 
-	// ƒ‚ƒjƒ^ƒvƒƒOƒ‰ƒ€ ROM ƒf[ƒ^
+	// ãƒ¢ãƒ‹ã‚¿ãƒ—ãƒ­ã‚°ãƒ©ãƒ  ROM ãƒ‡ãƒ¼ã‚¿
 	static final short ROMDATA[] = {
 			// 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, a, b, c, d, e, f,
 			/* 0x0000 */0x3e, 0x92, 0xd3, 0xfb, 0xc3, 0x5f, 0x00, 0x00, 0xc3,
@@ -290,22 +290,22 @@ public class TK85Simulator extends Thread {
 			0x0f, 0x0f, 0xe6, 0x0f, 0x12, 0x1b, 0xc9, };
 
 	// ***************************************************************************************************
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public TK85Simulator(TK85LED led, TK85Keyboard keyboard) {
 		// this.parent = parent;
 		// this.frame = frame;
 
-		// CPUEƒƒ‚ƒŠ—Ìˆæ‚ğì¬
+		// CPUãƒ»ãƒ¡ãƒ¢ãƒªé ˜åŸŸã‚’ä½œæˆ
 		mem = new Mem8085();
 		cpu = new CPU8085(mem, new PublicLabelList(), new BreakPointList());
 
-		// ROM ƒf[ƒ^‚ğƒ[ƒh
+		// ROM ãƒ‡ãƒ¼ã‚¿ã‚’ãƒ­ãƒ¼ãƒ‰
 		for (int i = 0; i < 0x800; i++) {
 			mem.setValue(i, ROMDATA[i]);
 			mem.setReadOnly(i, true);
 		}
 
-		// ƒL[ƒ{[ƒh‚ğÚ‘±
+		// ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰ã‚’æ¥ç¶š
 		parallelio = new Parallel8255();
 
 		cpu.ioport.assignInputDevice(PORT_A, parallelio);
@@ -322,14 +322,14 @@ public class TK85Simulator extends Thread {
 		parallelio.assignInputDevice(Parallel8255.A, this.keyboard);
 		parallelio.assignOutputDevice(Parallel8255.C, this.keyboard);
 
-		// LED ‚ğÚ‘±
+		// LED ã‚’æ¥ç¶š
 		this.led = led;
 		dmac = new DMAController8085(cpu);
 		dmac.assignDMADevice(led, 0x83f8, 8);
 	}
 
 	// ***************************************************************************************************
-	// CPU ‚Ìó‘Ô‚ğ‚µ‚ç‚×A‚à‚µ Halt ó‘Ô‚È‚çƒVƒXƒeƒ€‚ğ’â~‚·‚éB
+	// CPU ã®çŠ¶æ…‹ã‚’ã—ã‚‰ã¹ã€ã‚‚ã— Halt çŠ¶æ…‹ãªã‚‰ã‚·ã‚¹ãƒ†ãƒ ã‚’åœæ­¢ã™ã‚‹ã€‚
 	synchronized void checkCPU_and_halt() {
 		if (cpu.isHalted()) {
 			try {
@@ -341,14 +341,14 @@ public class TK85Simulator extends Thread {
 	}
 
 	// ***************************************************************************************************
-	// ƒVƒXƒeƒ€‚ğÄŠJ‚·‚éB
+	// ã‚·ã‚¹ãƒ†ãƒ ã‚’å†é–‹ã™ã‚‹ã€‚
 	synchronized void restart() {
 		this.notify();
 		isWait = false;
 	}
 
 	// ***************************************************************************************************
-	// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚·‚é
+	// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã™ã‚‹
 	public void run() {
 		while (true) {
 			try {
@@ -365,25 +365,25 @@ public class TK85Simulator extends Thread {
 	}
 
 	// ***************************************************************************************************
-	// –½—ß”‚ğ”‚¦n‚ß‚é
+	// å‘½ä»¤æ•°ã‚’æ•°ãˆå§‹ã‚ã‚‹
 	public void startCountInstruction() {
 		instructionCount = 5;
 	}
 
 	// ***************************************************************************************************
-	// –½—ß”‚ğ”‚¦‚é‚Ì‚ğ‚â‚ß‚é
+	// å‘½ä»¤æ•°ã‚’æ•°ãˆã‚‹ã®ã‚’ã‚„ã‚ã‚‹
 	public void stopCountInstruction() {
 		instructionCount = -1;
 	}
 
 	// ***************************************************************************************************
-	// –½—ß”‚ğ”‚¦Aƒ`ƒFƒbƒN‚·‚é
+	// å‘½ä»¤æ•°ã‚’æ•°ãˆã€ãƒã‚§ãƒƒã‚¯ã™ã‚‹
 	public void checkInstructionCount() {
-		// ƒJƒEƒ“ƒgƒ_ƒEƒ“
+		// ã‚«ã‚¦ãƒ³ãƒˆãƒ€ã‚¦ãƒ³
 		if (instructionCount > 0)
 			instructionCount--;
 
-		// ‚O‚É‚È‚Á‚ÄASTEP “®ì‚¾‚Á‚½‚çARST7.5 Š„‚è‚İ
+		// ï¼ã«ãªã£ã¦ã€STEP å‹•ä½œã ã£ãŸã‚‰ã€RST7.5 å‰²ã‚Šè¾¼ã¿
 		if (instructionCount == 0) {
 			instructionCount = -1;
 			if (step)

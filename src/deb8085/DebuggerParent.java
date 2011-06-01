@@ -1,11 +1,11 @@
-package deb8085;
+ï»¿package deb8085;
 
 public interface DebuggerParent {
 
-	// ƒfƒoƒbƒOŠJn‘Oƒƒ\ƒbƒh
+	// ãƒ‡ãƒãƒƒã‚°é–‹å§‹å‰ãƒ¡ã‚½ãƒƒãƒ‰
 	public abstract void onBeginDebug();
 
-	// ƒfƒoƒbƒOI—¹ƒƒ\ƒbƒh
+	// ãƒ‡ãƒãƒƒã‚°çµ‚äº†æ™‚ãƒ¡ã‚½ãƒƒãƒ‰
 	public abstract void onEndDebug();
 
 }

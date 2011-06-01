@@ -1,20 +1,18 @@
-package deb8085;
+﻿package deb8085;
 
-import java.lang.Throwable;
-
-public class BreakPointListException extends Throwable {
-	/**
+public class BreakPointListException extends Exception {
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = -7084125307012394855L;
-	
-	String message;
+    private static final long serialVersionUID = -7084125307012394855L;
 
-	public BreakPointListException() {
-	}
+    String message;
 
-	public BreakPointListException(String s) {
-		message = s;
-	}
+    public BreakPointListException() {
+    }
+
+    public BreakPointListException(String s) {
+        message = s;
+    }
 
 }

@@ -1,20 +1,20 @@
-package deb8085.io;
+ï»¿package deb8085.io;
 
-// ƒŠƒ“ƒOEƒoƒbƒtƒ@  ƒNƒ‰ƒX
+// ãƒªãƒ³ã‚°ãƒ»ãƒãƒƒãƒ•ã‚¡  ã‚¯ãƒ©ã‚¹
 public class RingBuffer {
 
 	private int buf[];
 	private int nextputpos = 0;
 	private int nextgetpos = 0;
 
-	// ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	// ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	public RingBuffer(int n) {
 		buf = new int[n];
 	}
 
-	// ƒoƒbƒtƒ@‚É‚P—v‘f“Š“ü
+	// ãƒãƒƒãƒ•ã‚¡ã«ï¼‘è¦ç´ æŠ•å…¥
 	public void put(int val) {
-		// –ƒ^ƒ“‚¾‚Á‚½‚ç‹p‰º
+		// æº€ã‚¿ãƒ³ã ã£ãŸã‚‰å´ä¸‹
 		if (isFull())
 			return;
 
@@ -24,9 +24,9 @@ public class RingBuffer {
 			nextputpos = 0;
 	}
 
-	// ƒoƒbƒtƒ@‚©‚ç‚P—v‘fæ“¾
+	// ãƒãƒƒãƒ•ã‚¡ã‹ã‚‰ï¼‘è¦ç´ å–å¾—
 	public int get() {
-		// ‹ó‚Á‚Û‚¾‚Á‚½‚ç‹p‰º
+		// ç©ºã£ã½ã ã£ãŸã‚‰å´ä¸‹
 		if (isEmpty())
 			return -1;
 
@@ -37,7 +37,7 @@ public class RingBuffer {
 		return result;
 	}
 
-	// ƒoƒbƒtƒ@‚ğˆê•à–ß‚é
+	// ãƒãƒƒãƒ•ã‚¡ã‚’ä¸€æ­©æˆ»ã‚‹
 	public void back() {
 		if (!isEmpty())
 			nextputpos--;
@@ -46,19 +46,19 @@ public class RingBuffer {
 			nextputpos = buf.length - 1;
 	}
 
-	// ƒoƒbƒtƒ@‚ğ‹ó‚Á‚Û‚É‚·‚é
+	// ãƒãƒƒãƒ•ã‚¡ã‚’ç©ºã£ã½ã«ã™ã‚‹
 	public void flush() {
 		// buf =
 		nextgetpos = 0;
 		nextputpos = 0;
 	}
 
-	// ƒoƒbƒtƒ@‚Í‹ó‚Á‚Û‚©H
+	// ãƒãƒƒãƒ•ã‚¡ã¯ç©ºã£ã½ã‹ï¼Ÿ
 	public boolean isEmpty() {
 		return nextputpos == nextgetpos;
 	}
 
-	// ƒoƒbƒtƒ@‚Í–ƒ^ƒ“‚©H
+	// ãƒãƒƒãƒ•ã‚¡ã¯æº€ã‚¿ãƒ³ã‹ï¼Ÿ
 	public boolean isFull() {
 		if (nextputpos < buf.length - 1)
 			return nextputpos + 1 == nextgetpos;
